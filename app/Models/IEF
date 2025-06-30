@@ -1,0 +1,15 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class IEF extends Model
+{
+    protected $fillable = ['inspection_academique_id', 'nom'];
+
+    public function ia()
+    {
+        return $this->belongsTo(InspectionAcademique::class, 'inspection_academique_id');
+    }
+}

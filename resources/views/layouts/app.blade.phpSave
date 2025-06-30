@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'MFPT Admin')</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon" sizes="any">
+    <link rel="icon" href="{{ asset('icon.svg') }}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+
+    <!-- Preload critical resources -->
+    <link rel="preload" href="{{ asset('css/app.css') }}" as="style">
+    <link rel="preload" href="{{ asset('js/app.js') }}" as="script">
+
+    <!-- Styles -->
+    @includeWhen(config('app.env') !== 'testing', 'partials.styles')
+    @stack('styles')
+
+    <!-- Scripts head -->
+    @includeWhen(config('app.debug'), 'partials.scripts-head')
+
+    <!-- Cropper.js CDN -->
+<link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Skip to main content -->
+    <a href="#main-content" class="visually-hidden-focusable position-absolute top-0 start-0 p-2 bg-dark text-white">Aller au contenu principal</a>
+
+    <!-- Barre de navigation -->
+    @includeWhen(auth()->check(), 'partials.navbar')
+
+    <!-- Contenu principal -->
+    <main id="main-content" class="flex-shrink-0" role="main">
+        <div class="container-fluid px-3 px-md-4">
+            <div class="row g-0">
+                <!-- Sidebar -->
+                @auth
+                    @unless(request()->is('/'))
+                        <aside class="col-md-3 col-lg-2 d-none d-md-block sidebar-container" aria-label="Menu principal">
+                            @include('partials.sidebar')
+                        </aside>
+                    @endunless
+                @endauth
+
+                <!-- Contenu dynamique -->
+                <div class="@auth @unless(request()->is('/')) col-md-9 col-lg-10 @else col-12 @endunless @else col-12 @endauth main-content-container">
+                    <div class="container-fluid py-3 py-md-4">
+                        @yield('content')
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Pied de page -->
+    @includeWhen(config('app.show_footer', true), 'partials.footer')
+
+    <!-- Scripts -->
+    @include('partials.scripts')
+
+    <!-- Cropper.js JS -->
+<script src="https://unpkg.com/cropperjs/dist/cropper.min.js"></script>
+ @stack('scripts')
+</body>
+</html>

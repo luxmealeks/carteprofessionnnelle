@@ -1,0 +1,204 @@
+/* Variables CSS */
+
+:root {
+    --mfpt-primary: #0c4b8e;
+    --mfpt-primary-light: #e1e9f5;
+    --mfpt-secondary: #1a73e8;
+    --mfpt-danger: #dc3545;
+    --mfpt-success: #28a745;
+    --mfpt-warning: #ffc107;
+    --mfpt-light: #f8f9fa;
+    --mfpt-dark: #212529;
+    --mfpt-gray: #6c757d;
+    --border-radius: 0.375rem;
+    --border-radius-lg: 0.5rem;
+    --border-radius-xl: 1rem;
+    --box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    --box-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    --transition: all 0.2s ease-in-out;
+}
+
+
+/* Reset et base */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    color: var(--mfpt-dark);
+    background-color: #f5f7fa;
+    margin: 0;
+}
+
+
+/* Layout */
+
+.main-content-container {
+    padding: 1.5rem;
+    min-height: calc(100vh - 56px);
+    /* Hauteur navbar */
+}
+
+.sidebar-container {
+    background: white;
+    border-right: 1px solid #e9ecef;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+}
+
+
+/* Assurez-vous que le body a une hauteur minimale */
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Si vous utilisez une sidebar */
+
+.sidebar-container {
+    height: calc(100vh - var(--navbar-height));
+    position: sticky;
+    top: var(--navbar-height));
+}
+
+.main-content-container {
+    flex: 1;
+    overflow-y: auto;
+    height: calc(100vh - var(--navbar-height));
+}
+
+
+/* Cartes */
+
+.card {
+    border: none;
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--box-shadow-sm);
+    transition: var(--transition);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: var(--box-shadow);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    font-weight: 600;
+}
+
+
+/* Boutons */
+
+.btn {
+    border-radius: var(--border-radius-lg);
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-primary {
+    background-color: var(--mfpt-primary);
+    border-color: var(--mfpt-primary);
+}
+
+.btn-primary:hover {
+    background-color: #0a3a6e;
+    border-color: #0a3a6e;
+}
+
+
+/* Navigation */
+
+.navbar {
+    box-shadow: var(--box-shadow-sm);
+    z-index: 1030;
+}
+
+
+/* Responsive */
+
+@media (max-width: 767.98px) {
+    .main-content-container {
+        padding: 1rem;
+    }
+    .card {
+        border-radius: var(--border-radius-lg);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .main-content-container {
+        padding: 0.75rem;
+    }
+}
+
+
+/* Animations */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+
+/* Utilitaires */
+
+.rounded-xl {
+    border-radius: var(--border-radius-xl) !important;
+}
+
+.shadow-hover {
+    transition: var(--transition);
+}
+
+.shadow-hover:hover {
+    box-shadow: var(--box-shadow) !important;
+}
+
+
+/* Optimisation pour l'impression */
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        background: white !important;
+    }
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #dee2e6 !important;
+    }
+}
