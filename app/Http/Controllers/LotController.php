@@ -8,12 +8,12 @@ use App\Models\InspectionAcademique;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
+use App\Models\Agentlot;
+
 
 class LotController extends Controller
 {
-    /**
-     * Affiche la liste des lots avec filtres
-     */
+    
     public function index(Request $request)
     {
         $query = Lot::with(['inspectionAcademique', 'agents'])
@@ -61,25 +61,43 @@ class LotController extends Controller
     /**
      * Enregistre un nouveau lot
      */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'inspection_academique_id' => 'required|exists:inspection_academiques,id',
+public function store(Request $request)
+{
+    $request->validate([
+        'inspection_academique_id' => 'required|exists:inspection_academiques,id',
+        'lot_label' => 'nullable|string|max:255',
+    ]);
+
+    $inspection = InspectionAcademique::findOrFail($request->inspection_academique_id);
+
+    $numero = 'LOT-' . strtoupper(Str::slug($inspection->nom)) . '-' . now()->format('ymd-His');
+
+   
+    $lot = Lot::create([
+        'numero' => $numero,
+        'inspection_academique_id' => $inspection->id,
+        'region' => $inspection->region,
+        'label' => $request->input('lot_label', 'Lot ' . now()->format('d/m/Y')),
+    ]);
+
+   
+    $agents = Agent::whereHas('etablissement', function($q) use ($inspection) {
+            $q->where('inspection_academique_id', $inspection->id);
+        })
+        ->where('statut_photo', 'validee') 
+        ->get();
+
+    foreach ($agents as $agent) {
+        Agentlot::create([
+            'agent_id' => $agent->id,
+            'lot_id' => $lot->id,
         ]);
-
-        $inspection = InspectionAcademique::findOrFail($request->inspection_academique_id);
-
-        $numero = 'LOT-' . strtoupper(Str::slug($inspection->nom)) . '-' . now()->format('ymd-His');
-
-        Lot::create([
-            'numero' => $numero,
-            'inspection_academique_id' => $inspection->id,
-            'region' => $inspection->region,
-            'label' => $request->input('lot_label', 'Lot ' . now()->format('d/m/Y')),
-        ]);
-
-        return redirect()->route('lots.index')->with('success', 'Lot créé avec succès: ' . $numero);
     }
+
+    return redirect()->route('lots.show', $lot->id)
+        ->with('success', 'Lot créé avec succès : ' . $numero . ' avec ' . $agents->count() . ' agents associés.');
+}
+
 
     /**
      * Affiche le formulaire de génération
@@ -98,7 +116,7 @@ class LotController extends Controller
         $agents = Agent::whereHas('etablissement', function($q) use ($ia_id) {
                 $q->where('inspection_academique_id', $ia_id);
             })
-            ->where('photo_validee', true)
+            ->where('photo_validee', 'validee')
             ->whereDoesntHave('lots')
             ->with('etablissement')
             ->get();
@@ -196,9 +214,6 @@ class LotController extends Controller
                ->with('success', 'Lot mis à jour avec succès');
     }
 
-    /**
-     * Supprime un lot
-     */
     public function destroy(Lot $lot)
     {
         try {
