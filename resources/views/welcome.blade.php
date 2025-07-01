@@ -8,7 +8,7 @@
             <div class="welcome-logo mb-4">
                 <img src="{{ asset('images/mfpt-logo-white.png') }}" alt="Logo MFPT" class="img-fluid" style="max-height: 100px;">
             </div>
-            <h1 class="display-4 fw-bold mb-3">Gestion ok des Cartes Professionnelles</h1>
+            <h1 class="display-4 fw-bold mb-3">SAMACARTE : Système d’Administration et de Management Avancé des Cartes des Agents, avec Référencement et Traçabilité Électronique</h1>
             <p class="lead mb-4">Plateforme officielle du Ministère pour la gestion des cartes d'identification du personnel</p>
 
             <div class="welcome-badge mb-4">
