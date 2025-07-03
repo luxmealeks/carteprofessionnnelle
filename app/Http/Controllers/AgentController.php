@@ -183,7 +183,11 @@ public function index(Request $request)
             // Définir le chemin de sauvegarde
             $filename = 'photos/photo_' . uniqid() . '.jpg';
             Storage::disk('public')->put($filename, $imageData);
-
+            
+            if (!Storage::disk('public')->exists($filename)) {
+                \Log::error("Erreur de sauvegarde photo agent : $filename non trouvé");
+            }
+            
             // Mettre à jour les champs du modèle
             $validated['photo'] = $filename;
             $validated['statut_photo'] = 'en_attente';
@@ -247,8 +251,8 @@ public function index(Request $request)
 
         return view('agents.carte', [
             'agent' => $agent,
-            'rectoPath' => asset('template/carte_recto.png'),
-            'versoPath' => asset('template/carte_verso.png'),
+            'rectoPath' => asset('template/recto.jpeg'),
+            'versoPath' => asset('template/verso.jpeg'),
             'signaturePath' => asset('images/cachet_ministere.png'),
             'qrCode' => QrCode::size(100)->generate(route('agents.verify', $agent->id))
         ]);
@@ -440,6 +444,9 @@ public function index(Request $request)
 {
     return $this->downloadCard($id);
 }
+
+
+
 public function import(Request $request)
 {
     $request->validate([

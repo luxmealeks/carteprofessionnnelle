@@ -2,101 +2,188 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <title>Carte - {{ $agent->prenom }} {{ $agent->nom }}</title>
     <style>
-        html, body {
+        @page {
+            size: 85.6mm 54mm;
+            margin: 0;
+        }
+
+        body {
             margin: 0;
             padding: 0;
-            width: 242.65pt;
-            height: 153.07pt;
         }
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .carte {
+
+        .page {
+            width: 85.6mm;
+            height: 54mm;
             position: relative;
-            width: 100%;
-            height: 100%;
+            page-break-after: always;
+            overflow: hidden;
         }
-        .background {
+
+        .full-bg {
             position: absolute;
             width: 100%;
             height: 100%;
-            z-index: 1;
+            top: 0;
+            left: 0;
         }
-        .photo-qr {
-    position: absolute;
-    top: 60pt;        /* Avant : 56pt → ajusté vers le haut */
-    left: 10pt;       /* Garde le même décalage horizontal */
-    width: 50pt;
-    height: 90pt;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 2;
-}
 
-.photo {
-    width: 56.7pt;     /* 2 cm */
-    height: 65.6pt;    /* 2.67 cm - ratio 3:4 */
-    object-fit: cover;
-}
-
-.qr {
-    width: 25pt;
-    height: 25pt;
-}
-
-
-        .infos {
+        .photo-container {
             position: absolute;
-            top: 60pt;
-            left: 130pt;
-            width: 100pt;
+            top: 21.2mm;
+            left: 4.3mm;
+            width: 21mm;
+            height: 27mm;
+            z-index: 10;
+        }
+
+        .photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: 0.1mm solid #d5d3d3;
+        }
+
+        .qr-code {
+            width: 100%;
+            height: 35%;
+        }
+
+        .qr-code svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .info-container {
+            position: absolute;
+            top: 21mm; 
+            left: 28mm; 
+            font-size: 3.2mm;
+            line-height: 1;
+            z-index: 10;
+        }
+
+        .info-field {
+            margin-bottom: 1mm;
+        }
+
+        .info-label {
+            margin-right: 1mm;
+        }
+
+        .info-value {
+            font-weight: bold;
+        }
+
+        .cachet {
+            position: absolute;
+            bottom: 8mm;
+            right: 12mm;
+            width: 28mm;
+            opacity: 1;
+            z-index: 12;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 3mm;
+            left: 58mm;
+            font-size: 3mm;
+            z-index: 10;
+        }
+
+        .verso-text.top {
+            position: absolute;
+            bottom: 20mm;
+            left: 5mm;
+            right: 5mm;
+            font-size: 2.8mm;
             text-align: center;
-            font-size: 9pt;
+            z-index: 10;
             line-height: 1.3;
-            z-index: 2;
         }
-        .infos strong {
-            font-size: 11pt;
-        }
-        .signature {
+
+        .verso-footer {
             position: absolute;
-            bottom: 10pt;
-            right: 10pt;
-            width: 60pt;
+            bottom: 4mm;
+            left: 5mm;
+            right: 5mm;
+            font-size: 2mm;
+            text-align: center;
+            z-index: 10;
+            line-height: 1.2;
+            font-weight: bold;
+        }
+
+        .verso-footer hr {
+            border: none;
+            border-top: 0.2mm solid #333;
+            margin-bottom: 1mm;
+            width: 100%;
         }
     </style>
 </head>
 <body>
 
+@php
+    $recto = base64_encode(file_get_contents(public_path('storage/template/recto.png')));
+    $verso = base64_encode(file_get_contents(public_path('storage/template/verso.png')));
+    $cachet = base64_encode(file_get_contents(public_path('storage/images/cachet_ministre.png')));
+@endphp
+
 <!-- RECTO -->
-<div class="carte">
-    <img class="background" src="{{ $rectoPath }}" alt="Recto">
+<div class="page">
+    <img class="full-bg" src="data:image/png;base64,{{ $recto }}" alt="Recto">
 
-    <div class="photo-qr">
+    <div class="photo-container">
         <img class="photo" src="{{ $photoPath }}" alt="Photo">
-        <img class="qr" src="{{ $qrCode }}" alt="QR Code">
+        <div class="qr-code">
+            {!! $qrCode !!}
+        </div>
     </div>
 
-    <div class="infos">
-        <strong>{{ $agent->prenom }} {{ $agent->nom }}</strong><br>
-        Matricule : {{ $agent->matricule }}<br>
-        Fonction : {{ $agent->fonction }}<br>
-        {{ $agent->etablissement->nom ?? $agent->direction->nom ?? '' }}<br>
-        IA : {{ $agent->inspectionAcademique->nom ?? '' }}
+    <div class="info-container">
+        <div class="info-field">
+            <span class="info-label">Prénom:</span>
+            <span class="info-value">{{ $agent->prenom }}</span>
+        </div>
+        <div class="info-field">
+            <span class="info-label">Nom:</span>
+            <span class="info-value">{{ $agent->nom }}</span>
+        </div>
+        <div class="info-field">
+            <span class="info-label">Matricule:</span>
+            <span class="info-value">{{ $agent->matricule }}</span>
+        </div>
+        <div class="info-field">
+            <span class="info-label">Fonction:</span>
+            <span class="info-value">{{ $agent->fonction }}</span>
+        </div>
     </div>
 
-    <img class="signature" src="{{ $signaturePath }}" alt="Cachet Ministère">
+    <img class="cachet" src="data:image/png;base64,{{ $cachet }}" alt="Cachet Ministère">
+
+    <div class="footer">
+        Délivrée le: <span class="date-value">{{ \Carbon\Carbon::now()->format('m/Y') }}</span>
+    </div>
 </div>
 
-<!-- SAUT DE PAGE POUR VERSO -->
-<div style="page-break-after: always;"></div>
-
 <!-- VERSO -->
-<div class="carte">
-    <img class="background" src="{{ $versoPath }}" alt="Verso">
+<div class="page" style="page-break-after: avoid;">
+    <img class="full-bg" src="data:image/png;base64,{{ $verso }}" alt="Verso">
+
+    <div class="verso-text top">
+        Carte strictement personnelle, propriété du Ministère de la Formation Professionnelle et Technique (MFPT).<br>
+        Toute personne trouvant cette carte est priée de bien vouloir l'adresser à la Direction des ressources humaines du dit ministère.
+    </div>
+
+    <div class="verso-footer">
+        Sphère ministérielle, arrondissement 2, Bâtiment C, Diamniadio, Dakar Sénégal.<br>
+        Téléphone : 33 865 70 80 • Site : https://formation.gouv.sn
+    </div>
 </div>
 
 </body>

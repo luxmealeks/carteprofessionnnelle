@@ -145,7 +145,7 @@ public function store(Request $request)
         $lot = Lot::create([
             'numero' => $numero,
             'inspection_academique_id' => $ia->id,
-            'region' => $ia->region,
+            // 'region' => $ia->region,
             'label' => $request->lot_label,
         ]);
 
@@ -164,6 +164,7 @@ public function store(Request $request)
         $lot = Lot::with(['agents', 'inspectionAcademique'])->findOrFail($id);
         $pdf = Pdf::loadView('lots.pdf', compact('lot'));
         return $pdf->download('lot_' . $lot->numero . '.pdf');
+        
     }
 
     /**
@@ -265,4 +266,25 @@ public function store(Request $request)
         $ias = InspectionAcademique::orderBy('nom')->get();
         return view('lots.choisir', compact('lots', 'ias'));
     }
+
+public function generatePDF($lotId)
+{
+    $lot = Lot::with('agents')->findOrFail($lotId);
+    $agents = $lot->agents()->orderBy('nom')->get();
+
+    if ($agents->isEmpty()) {
+        return back()->with('error', 'Ce lot ne contient aucun agent.');
+    }
+
+    $pdf = PDF::loadView('cartes.template', compact('lot', 'agents'))
+        ->setPaper([0, 0, 242.6, 153], 'portrait') // 85.6mm x 54mm
+        ->setOption('margin-top', 0)
+        ->setOption('margin-right', 0)
+        ->setOption('margin-bottom', 0)
+        ->setOption('margin-left', 0);
+
+    return $pdf->stream("cartes-{$lot->label}.pdf");
+}
+
+
 }

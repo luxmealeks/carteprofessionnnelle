@@ -190,3 +190,5 @@ Route::post('/lots/imprimer/{ia}', [LotController::class, 'imprimer'])->name('lo
 Route::get('/lots/generer', [LotController::class, 'genererForm'])->name('lots.generer.form');
 Route::post('/lots/imprimer/{ia_id}', [LotController::class, 'imprimer'])->name('lots.imprimer');
 Route::post('/lots/generer', [LotController::class, 'generer'])->name('lots.generer');
+
+Route::get('/agents/{id}', [AgentController::class, 'show'])->name('agents.show');
