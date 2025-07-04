@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'laravel/livewire-starter-kit',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => null,
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => 'c1d9200ca39b186997e9be552a33ce04ffd16624',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -25,6 +25,15 @@
             'reference' => '8e71b99fc53bb8eb77f316c3c452dd74ab7cb25d',
             'type' => 'library',
             'install_path' => __DIR__ . '/../barryvdh/laravel-dompdf',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'barryvdh/laravel-snappy' => array(
+            'pretty_version' => 'v1.0.4',
+            'version' => '1.0.4.0',
+            'reference' => '5b8668e4a54be630973fd309b4cb1abe75a8afbb',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../barryvdh/laravel-snappy',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
@@ -487,6 +496,15 @@
             'aliases' => array(),
             'dev_requirement' => true,
         ),
+        'knplabs/knp-snappy' => array(
+            'pretty_version' => 'v1.5.1',
+            'version' => '1.5.1.0',
+            'reference' => '3dd138e9e47de91cd2e056c5e6e1a0dd72547ee7',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../knplabs/knp-snappy',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'kodova/hamcrest-php' => array(
             'dev_requirement' => true,
             'replaced' => array(
@@ -503,9 +521,9 @@
             'dev_requirement' => false,
         ),
         'laravel/livewire-starter-kit' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => null,
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => 'c1d9200ca39b186997e9be552a33ce04ffd16624',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
