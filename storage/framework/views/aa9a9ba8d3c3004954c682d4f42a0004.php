@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Cartes - {{ $lot->label }}</title>
+    <title>Cartes - <?php echo e($lot->label); ?></title>
     <style>
          /* Définit la taille exacte d’une page PDF au format badge (carte bancaire) */
         @page {
@@ -140,21 +140,21 @@
 </head>
 <body>
 
-@php
+<?php
     $recto = base64_encode(file_get_contents(public_path('storage/template/recto.png')));
     $verso = base64_encode(file_get_contents(public_path('storage/template/verso.png')));
     $cachet = base64_encode(file_get_contents(public_path('storage/images/cachet_ministre.png')));
 
     
-@endphp
+?>
 
-@foreach($agents as $index => $agent)
+<?php $__currentLoopData = $agents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $agent): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <!-- RECTO -->
     <div class="page" style="page-break-after: always;">
-    <img class="full-bg" src="data:image/png;base64,{{ $recto }}">
+    <img class="full-bg" src="data:image/png;base64,<?php echo e($recto); ?>">
     <!-- ... contenu recto ... -->
     <div class="photo-container">
-        @php
+        <?php
             $photoBase64 = $agent->photo ? (function($photoPath){
                 $cleanPath = str_replace('public/', '', $photoPath);
                 $fullPath = public_path('storage/' . $cleanPath);
@@ -165,49 +165,50 @@
                 }
                 return null;
             })($agent->photo) : null;
-        @endphp
+        ?>
 
-        @if($photoBase64)
-            <img class="photo" src="{{ $photoBase64 }}">
-        @else
+        <?php if($photoBase64): ?>
+            <img class="photo" src="<?php echo e($photoBase64); ?>">
+        <?php else: ?>
             <div class="photo"></div>
-        @endif
+        <?php endif; ?>
 
         <div class="qr-code">
-            {!! \QrCode::size(100)->format('svg')->generate(route('agents.show', $agent->id)) !!}
+            <?php echo \QrCode::size(100)->format('svg')->generate(route('agents.show', $agent->id)); ?>
+
         </div>
     </div>
 
     <div class="info-container">
         <div class="info-field">
             <span class="info-label">Prénom:</span>
-            <span class="info-value">{{ $agent->prenom }}</span>
+            <span class="info-value"><?php echo e($agent->prenom); ?></span>
         </div>
         <div class="info-field">
             <span class="info-label">Nom:</span>
-            <span class="info-value">{{ $agent->nom }}</span>
+            <span class="info-value"><?php echo e($agent->nom); ?></span>
         </div>
         <div class="info-field">
             <span class="info-label">Matricule:</span>
-            <span class="info-value">{{ $agent->matricule }}</span>
+            <span class="info-value"><?php echo e($agent->matricule); ?></span>
         </div>
         <div class="info-field">
             <span class="info-label">Fonction:</span>
-            <span class="info-value">{{ $agent->fonction }}</span>
+            <span class="info-value"><?php echo e($agent->fonction); ?></span>
         </div>
     </div>
 
-    <img src="data:image/png;base64,{{ $cachet }}" class="cachet">
+    <img src="data:image/png;base64,<?php echo e($cachet); ?>" class="cachet">
 
     <div class="footer">
-        Délivrée le: <span class="date-value">{{ \Carbon\Carbon::now()->format('m/Y') }}</span>
+        Délivrée le: <span class="date-value"><?php echo e(\Carbon\Carbon::now()->format('m/Y')); ?></span>
     </div>
 </div>
 
 
     <!-- VERSO -->
-    <div class="page" @if($loop->last) style="page-break-after: avoid;" @else style="page-break-after: always;" @endif>
-        <img class="full-bg" src="data:image/png;base64,{{ $verso }}">
+    <div class="page" <?php if($loop->last): ?> style="page-break-after: avoid;" <?php else: ?> style="page-break-after: always;" <?php endif; ?>>
+        <img class="full-bg" src="data:image/png;base64,<?php echo e($verso); ?>">
     
         <div class="verso-text top">
             Carte strictement personnelle, propriété du Ministère de la Formation Professionnelle et Technique (MFPT).<br>
@@ -219,8 +220,9 @@
             Téléphone : 33 865 70 80 • Site : https://formation.gouv.sn
         </div>
     </div>
-@endforeach
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
 
 </body>
 </html>
+<?php /**PATH /Applications/MAMP/htdocs/carteprofessionnnelle/resources/views/lots/pdf.blade.php ENDPATH**/ ?>
