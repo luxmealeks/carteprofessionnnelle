@@ -739,6 +739,7 @@ class ComposerStaticInit11b66836e6ab1924735bd63a6cc66f49
         'App\\Livewire\\Settings\\Profile' => __DIR__ . '/../..' . '/app/Livewire/Settings/Profile.php',
         'App\\Models\\Activity' => __DIR__ . '/../..' . '/app/Models/Activity.php',
         'App\\Models\\Agent' => __DIR__ . '/../..' . '/app/Models/Agent.php',
+        'App\\Models\\Agentlot' => __DIR__ . '/../..' . '/app/Models/Agentlot.php',
         'App\\Models\\Corps' => __DIR__ . '/../..' . '/app/Models/Corps.php',
         'App\\Models\\Direction' => __DIR__ . '/../..' . '/app/Models/Direction.php',
         'App\\Models\\Etablissement' => __DIR__ . '/../..' . '/app/Models/Etablissement.php',

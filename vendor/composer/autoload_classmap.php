@@ -38,6 +38,7 @@ return array(
     'App\\Livewire\\Settings\\Profile' => $baseDir . '/app/Livewire/Settings/Profile.php',
     'App\\Models\\Activity' => $baseDir . '/app/Models/Activity.php',
     'App\\Models\\Agent' => $baseDir . '/app/Models/Agent.php',
+    'App\\Models\\Agentlot' => $baseDir . '/app/Models/Agentlot.php',
     'App\\Models\\Corps' => $baseDir . '/app/Models/Corps.php',
     'App\\Models\\Direction' => $baseDir . '/app/Models/Direction.php',
     'App\\Models\\Etablissement' => $baseDir . '/app/Models/Etablissement.php',

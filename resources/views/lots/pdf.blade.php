@@ -1,5 +1,3 @@
-c le code pdf.blade.php de lots: 
-
 <!DOCTYPE html>
 <html>
 <head>
