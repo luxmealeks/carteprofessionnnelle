@@ -100,7 +100,7 @@
                 <a class="nav-link py-2 {{ request()->routeIs('photos.index') ? 'active' : '' }}"
                    href="{{ route('photos.index') }}">
                     <i class="bi bi-clock-history me-2 text-warning"></i>
-                    A traiter
+                    En attente
                     @if(isset($pending_agents) && $pending_agents > 0)
                         <span class="badge bg-warning rounded-pill ms-2">{{ $pending_agents }}</span>
                     @endif

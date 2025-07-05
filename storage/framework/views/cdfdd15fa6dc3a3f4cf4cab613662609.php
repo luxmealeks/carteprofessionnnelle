@@ -268,12 +268,7 @@
                             <td class="text-end" data-label="Actions">
                                 <div class="d-flex justify-content-end gap-1">
                                     <!-- Bouton Traiter -->
-                                    <a href="<?php echo e(route('photos.traiter', $agent)); ?>" 
-                                       class="btn btn-xs btn-icon btn-warning"
-                                       data-bs-toggle="tooltip"
-                                       title="Traiter la photo">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
+                                 
                                     
                                     <!-- Bouton Voir -->
                                     <a href="<?php echo e(route('agents.show', $agent->id)); ?>"

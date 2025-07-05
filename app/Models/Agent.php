@@ -18,7 +18,7 @@ class Agent extends Model
         'motif_rejet_photo',
         'fonction',
         'etablissement_id',
-        'strucutre_id',
+        'structure_id',
         'inspection_academique_id',
         'corps_id',
         'grade_id',

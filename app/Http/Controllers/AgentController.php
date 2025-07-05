@@ -121,6 +121,20 @@ class AgentController extends Controller
         ]);
     }
 
+    public function destroy($id)
+{
+    try {
+        $agent = Agent::findOrFail($id);
+        $agent->delete();
+        
+        return redirect()->route('agents.index')
+               ->with('success', 'Agent supprimé avec succès');
+    } catch (\Exception $e) {
+        return redirect()->back()
+               ->with('error', 'Erreur lors de la suppression: '.$e->getMessage());
+    }
+}
+
     public function update(Request $request, Agent $agent)
     {
         // Validation des données
@@ -142,6 +156,10 @@ class AgentController extends Controller
     public function validerPhoto($id)
     {
         $agent = Agent::findOrFail($id);
+         // Vérification que l'agent a une photo
+    if (!$agent->photo || !Storage::disk('public')->exists($agent->photo)) {
+        return back()->with('error', 'Impossible de valider un agent sans photo');
+    }
         $agent->update([
             'statut_photo' => 'validee',
             'motif_rejet_photo' => null
@@ -155,6 +173,10 @@ class AgentController extends Controller
         $request->validate(['motif_rejet_photo' => 'required|string|max:255']);
 
         $agent = Agent::findOrFail($id);
+          // Vérification que l'agent a une photo
+    if (!$agent->photo || !Storage::disk('public')->exists($agent->photo)) {
+        return back()->with('error', 'Impossible de rejeter un agent sans photo');
+    }
         $agent->update([
             'statut_photo' => 'rejetee',
             'motif_rejet_photo' => $request->motif_rejet_photo
@@ -169,6 +191,10 @@ class AgentController extends Controller
                     ->where('statut_photo', 'validee')
                     ->findOrFail($id);
 
+    // Vérification que l'agent a une photo valide
+    if (!$agent->photo || !Storage::disk('public')->exists($agent->photo)) {
+        return back()->with('error', 'Impossible de générer la carte sans photo valide');
+    }
         return view('agents.carte', [
             'agent' => $agent,
             'rectoPath' => asset('template/recto.jpeg'),
@@ -183,9 +209,12 @@ class AgentController extends Controller
         $agent = Agent::with(['etablissement:id,nom', 'inspectionAcademique:id,nom'])
                       ->where('statut_photo', 'validee')
                       ->findOrFail($id);
-
+        // Vérifications
         if (!$agent->etablissement || !$agent->inspectionAcademique) {
             return back()->with('error', 'Les informations d\'affectation sont incomplètes.');
+        }
+        if (!$agent->photo || !Storage::disk('public')->exists($agent->photo)) {
+            return back()->with('error', 'Impossible de générer la carte sans photo valide');
         }
 
         // Convertir les images en base64
@@ -215,7 +244,10 @@ class AgentController extends Controller
         $matricule = preg_replace('/[\/\\\\]/', '_', $agent->matricule);
         return $pdf->download("carte_{$matricule}.pdf");
     }
-
+    protected function hasValidPhoto(Agent $agent): bool
+    {
+        return $agent->photo && Storage::disk('public')->exists($agent->photo);
+    }
     public function verify($id)
     {
         $agent = $this->getAgentWithRelations($id);
@@ -304,12 +336,13 @@ class AgentController extends Controller
             'telephone' => 'required|string|max:20',
             'adresse' => 'nullable|string|max:255',
             'fonction' => 'required|string|max:100',
+             'structure_id' => 'nullable|exists:structure,id',
             'corps_id' => 'nullable|exists:corps,id',
             'grade_id' => 'nullable|exists:grades,id',
             'iden' => 'nullable|string|max:255',
             'statut_photo' => 'nullable|in:en_attente,validee,rejetee',
             'motif_rejet_photo' => 'nullable|string|max:255',
-            'photo' => 'nullable|image|max:2048',
+            'photo' =>  'sometimes|required|image|max:2048',
             'cropped_photo' => 'nullable|string',
         ];
     

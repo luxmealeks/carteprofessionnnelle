@@ -28,6 +28,7 @@
                             <tr>
                                 <!-- Colonne Photo -->
                                 <td>
+                                    <?php if($agent->photo): ?>
                                     <div class="photo-preview">
                                         <img src="<?php echo e(Storage::url($agent->photo)); ?>"
                                              alt="Photo de <?php echo e($agent->prenom); ?> <?php echo e($agent->nom); ?>"
@@ -35,6 +36,11 @@
                                              data-bs-toggle="modal"
                                              data-bs-target="#photoModal<?php echo e($agent->id); ?>">
                                     </div>
+                                    <?php else: ?>
+                                    <div class="photo-preview bg-light d-flex align-items-center justify-content-center" style="width:80px;height:100px;">
+                                        <i class="bi bi-person text-muted" style="font-size:2rem;"></i>
+                                    </div>
+                                    <?php endif; ?>
                                 </td>
 
                                 <!-- Colonne Informations -->
@@ -42,7 +48,7 @@
                                     <h5 class="mb-1"><?php echo e($agent->prenom); ?> <?php echo e($agent->nom); ?></h5>
                                     <div class="text-muted small">
                                         <div><i class="bi bi-person-badge me-1"></i> <?php echo e($agent->matricule); ?></div>
-                                        <div><i class="bi bi-telephone me-1"></i> <?php echo e($agent->telephone); ?></div>
+                                        <div><i class="bi bi-telephone me-1"></i> <?php echo e($agent->telephone ?? 'Non renseigné'); ?></div>
                                         <?php if($agent->email): ?>
                                             <div><i class="bi bi-envelope me-1"></i> <?php echo e($agent->email); ?></div>
                                         <?php endif; ?>
@@ -78,6 +84,7 @@
                             </tr>
 
                             <!-- Modal pour la photo en grand -->
+                            <?php if($agent->photo): ?>
                             <div class="modal fade" id="photoModal<?php echo e($agent->id); ?>" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
@@ -91,6 +98,7 @@
                                     </div>
                                 </div>
                             </div>
+                            <?php endif; ?>
 
                             <!-- Modal pour le rejet -->
                             <div class="modal fade" id="rejetModal<?php echo e($agent->id); ?>" tabindex="-1" aria-hidden="true">
@@ -123,6 +131,12 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Pagination -->
+                <div class="d-flex justify-content-center mt-4">
+                    <?php echo e($agents->links()); ?>
+
+                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -144,7 +158,9 @@
     .table th {
         white-space: nowrap;
     }
+    .photo-preview .bi-person {
+        font-size: 2.5rem;
+    }
 </style>
 <?php $__env->stopPush(); ?>
-
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Applications/MAMP/htdocs/carteprofessionnnelle/resources/views/photos/index.blade.php ENDPATH**/ ?>

@@ -201,3 +201,15 @@ Route::post('/photos/{agent}/rogner-removebg', [PhotoController::class, 'rognerE
     ->name('photos.rogner.removebg');
 
     Route::resource('structures', StructureController::class);
+
+
+    Route::prefix('photos')->group(function() {
+        Route::get('/validation', [PhotoController::class, 'index'])->name('photos.validation');
+        Route::post('/valider/{agent}', [PhotoController::class, 'valider'])->name('photos.valider');
+        Route::post('/rejeter/{agent}', [PhotoController::class, 'rejeter'])->name('photos.rejeter');
+        Route::get('/recadrer/{agent}', [PhotoController::class, 'recadrer'])->name('photos.recadrer');
+        Route::put('/recadrer/{agent}', [PhotoController::class, 'updateCrop'])->name('photos.update-crop');
+    });
+
+
+

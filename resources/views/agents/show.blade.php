@@ -2,30 +2,82 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="h4 mb-1">
-                <i class="bi bi-person-badge me-2 text-primary"></i>Fiche Agent
-            </h2>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Tableau de bord</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('agents.index') }}">Agents</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">{{ $agent->prenom }} {{ $agent->nom }}</li>
-                </ol>
-            </nav>
-        </div>
+    <!-- Barre d'actions horizontale -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body py-2">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <!-- Groupe de boutons de gauche -->
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ route('agents.edit', $agent->id) }}" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil-square me-1"></i> Modifier
+                    </a>
+                    
+                    @if($agent->statut_photo === 'validee')
+                        <a href="{{ route('agents.generateCard', $agent->id) }}" class="btn btn-primary">
+                            <i class="bi bi-person-badge me-1"></i> Générer carte
+                        </a>
+                    @endif
 
-        <div class="d-flex gap-2">
-            <a href="{{ route('agents.edit', $agent->id) }}" class="btn btn-outline-primary">
-                <i class="bi bi-pencil-square me-1"></i> Modifier
-            </a>
-            <a href="{{ route('agents.index') }}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left me-1"></i> Retour
-            </a>
+                    @if($agent->statut_photo === 'en_attente' && $agent->photo)
+                        <form action="{{ route('agents.validerPhoto', $agent->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle me-1"></i> Valider photo
+                            </button>
+                        </form>
+
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectPhotoModal">
+                            <i class="bi bi-x-circle me-1"></i> Rejeter photo
+                        </button>
+                    @endif
+                </div>
+
+                <!-- Groupe de boutons de droite -->
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ route('agents.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Retour
+                    </a>
+                    
+                    <form action="{{ route('agents.destroy', $agent->id) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet agent ?')">
+                            <i class="bi bi-trash me-1"></i> Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Modal pour le rejet de photo -->
+    @if($agent->statut_photo === 'en_attente' && $agent->photo)
+    <div class="modal fade" id="rejectPhotoModal" tabindex="-1" aria-labelledby="rejectPhotoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('agents.rejeterPhoto', $agent->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rejectPhotoModalLabel">Rejeter la photo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="motif_rejet" class="form-label">Motif du rejet</label>
+                            <textarea class="form-control" id="motif_rejet" name="motif_rejet_photo" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-danger">Confirmer le rejet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Contenu principal -->
     <div class="row">
         <!-- Colonne Photo -->
         <div class="col-md-4 col-lg-3 mb-4">
@@ -73,7 +125,7 @@
         </div>
 
         <!-- Colonne Informations -->
-        <div class="col-md-8 col-lg-9">
+        <div class="col-md-8 col-lg-6">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom-0">
                     <h5 class="mb-0">
@@ -166,86 +218,82 @@
                             <label class="small text-muted mb-1">Établissement</label>
                             <p class="mb-0">{{ $agent->etablissement->nom ?? 'N/A' }}</p>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="small text-muted mb-1">Statut Photo</label>
-                            <p class="mb-0">
-                                @if($agent->statut_photo === 'validee')
-                                    <span class="badge bg-success">Validée</span>
-                                @elseif($agent->statut_photo === 'rejetee')
-                                    <span class="badge bg-danger">Rejetée</span>
-                                @else
-                                    <span class="badge bg-warning">En attente</span>
-                                @endif
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Actions supplémentaires -->
-    <div class="d-flex justify-content-between align-items-center mt-4">
-        <div>
-            @if($agent->statut_photo === 'validee')
-                <a href="{{ route('agents.generateCard', $agent->id) }}" class="btn btn-primary me-2">
-                    <i class="bi bi-person-badge me-1"></i> Générer la carte
-                </a>
-            @endif
-
-            @if($agent->statut_photo === 'en_attente')
-                <form action="{{ route('agents.validerPhoto', $agent->id) }}" method="POST" class="d-inline">
-                    @csrf
-                    <button type="submit" class="btn btn-success me-2">
-                        <i class="bi bi-check-circle me-1"></i> Valider la photo
-                    </button>
-                </form>
-
-                <button type="button" class="btn btn-danger me-2" data-bs-toggle="modal" data-bs-target="#rejectPhotoModal">
-                    <i class="bi bi-x-circle me-1"></i> Rejeter la photo
-                </button>
-
-                <!-- Modal pour le rejet de photo -->
-                <div class="modal fade" id="rejectPhotoModal" tabindex="-1" aria-labelledby="rejectPhotoModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form action="{{ route('agents.rejeterPhoto', $agent->id) }}" method="POST">
-                                @csrf
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="rejectPhotoModalLabel">Rejeter la photo</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="mb-3">
-                                        <label for="motif_rejet" class="form-label">Motif du rejet</label>
-                                        <textarea class="form-control" id="motif_rejet" name="motif_rejet_photo" rows="3" required></textarea>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                    <button type="submit" class="btn btn-danger">Confirmer le rejet</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+        <!-- Colonne Aperçu Carte -->
+        <div class="col-md-12 col-lg-3 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white border-bottom-0">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-badge me-2 text-primary"></i>Aperçu de la carte
+                    </h5>
                 </div>
-            @endif
-        </div>
-
-        <div>
-            <form action="{{ route('agents.destroy', $agent->id) }}" method="POST" class="d-inline">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet agent ?')">
-                    <i class="bi bi-trash me-1"></i> Supprimer
-                </button>
-            </form>
+                <div class="card-body text-center">
+                    @if($agent->statut_photo === 'validee')
+                        <div class="card-preview" style="border: 1px solid #ddd; border-radius: 10px; padding: 15px; background: white; max-width: 300px; margin: 0 auto;">
+                            <!-- En-tête de la carte -->
+                            <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                                <h5 style="margin: 0; color: #333;">Ministère de la Formation professionnelle et technique</h5>
+                                <p style="margin: 0; font-size: 0.8rem; color: #666;">Carte Professionnelle</p>
+                            </div>
+                            
+                            <!-- Photo et informations -->
+                            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                                <div style="flex: 1; text-align: left;">
+                                    <p style="margin: 5px 0; font-size: 0.9rem;"><strong>Nom:</strong> {{ $agent->nom }}</p>
+                                    <p style="margin: 5px 0; font-size: 0.9rem;"><strong>Prénom:</strong> {{ $agent->prenom }}</p>
+                                    <p style="margin: 5px 0; font-size: 0.9rem;"><strong>Matricule:</strong> {{ $agent->matricule }}</p>
+                                    <p style="margin: 5px 0; font-size: 0.9rem;"><strong>Fonction:</strong> {{ $agent->fonction ?? 'N/A' }}</p>
+                                </div>
+                                <div style="width: 80px; height: 80px; border: 1px solid #ddd; border-radius: 5px; overflow: hidden;">
+                                    @if($agent->photo)
+                                        <img src="{{ asset('storage/' . $agent->photo) }}" 
+                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                    @else
+                                        <div style="width: 100%; height: 100%; background: #eee; display: flex; align-items: center; justify-content: center;">
+                                            <i class="bi bi-person" style="font-size: 2rem; color: #999;"></i>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                            
+                            <!-- Pied de page -->
+                            <div style="border-top: 1px solid #eee; padding-top: 10px; font-size: 0.7rem; color: #666;">
+                                <p style="margin: 0;">Date d'émission: {{ now()->format('d/m/Y') }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <a href="{{ route('agents.generateCard', $agent->id) }}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-download me-1"></i> Télécharger
+                            </a>
+                        </div>
+                    @else
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            La photo doit être validée pour afficher un aperçu de la carte.
+                        </div>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 @push('styles')
 <style>
+    /* Styles pour la barre d'actions */
+    .action-bar {
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Styles pour les cartes */
     .card {
         border-radius: 0.5rem;
         border: none;
@@ -264,6 +312,19 @@
     .badge {
         font-weight: 500;
         letter-spacing: 0.3px;
+    }
+    
+    /* Style pour l'aperçu de la carte */
+    .card-preview {
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    /* Responsive pour les boutons */
+    @media (max-width: 768px) {
+        .btn-responsive {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
     }
 </style>
 @endpush

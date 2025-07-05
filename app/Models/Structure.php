@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Structure extends Model
 {
-    use HasFactory;
-    protected $table = 'structure'; // Ajoutez cette ligne
-    protected $fillable = ['nom', 'type'];
+    protected $table = 'structure'; // Spécifie le nom de la table
+    
+    protected $fillable = ['nom'];
+    
+    public function agents()
+    {
+        return $this->hasMany(Agent::class);
+    }
 }
