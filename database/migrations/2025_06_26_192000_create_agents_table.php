@@ -25,7 +25,7 @@ return new class extends Migration
 
             // ✅ CORRECTIONS ici
             $table->foreignId('etablissement_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignId('direction_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('structure_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('inspection_academique_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('corps_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('grade_id')->nullable()->constrained()->onDelete('set null');

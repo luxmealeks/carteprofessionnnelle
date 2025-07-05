@@ -84,7 +84,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="small text-muted mb-1">Matricule</label>
-                            <p class="mb-0">{{ $agent->matricule }}</p>
+                            <p class="mb-0">{{ $agent->matricule ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="small text-muted mb-1">CIN</label>
@@ -147,24 +147,36 @@
                             <p class="mb-0">{{ $agent->iden ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="small text-muted mb-1">Établissement</label>
-                            <p class="mb-0">{{ $agent->etablissement->nom ?? 'N/A' }}</p>
+                            <label class="small text-muted mb-1">Corps</label>
+                            <p class="mb-0">{{ $agent->corps->libelle ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="small text-muted mb-1">Direction</label>
-                            <p class="mb-0">{{ $agent->direction->nom ?? 'N/A' }}</p>
+                            <label class="small text-muted mb-1">Grade</label>
+                            <p class="mb-0">{{ $agent->grade->libelle ?? 'N/A' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="small text-muted mb-1">Structure</label>
+                            <p class="mb-0">{{ $agent->structure->nom ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="small text-muted mb-1">Inspection Académique</label>
                             <p class="mb-0">{{ $agent->inspectionAcademique->nom ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="small text-muted mb-1">Corps</label>
-                            <p class="mb-0">{{ $agent->corps->nom ?? 'N/A' }}</p>
+                            <label class="small text-muted mb-1">Établissement</label>
+                            <p class="mb-0">{{ $agent->etablissement->nom ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="small text-muted mb-1">Grade</label>
-                            <p class="mb-0">{{ $agent->grade->nom ?? 'N/A' }}</p>
+                            <label class="small text-muted mb-1">Statut Photo</label>
+                            <p class="mb-0">
+                                @if($agent->statut_photo === 'validee')
+                                    <span class="badge bg-success">Validée</span>
+                                @elseif($agent->statut_photo === 'rejetee')
+                                    <span class="badge bg-danger">Rejetée</span>
+                                @else
+                                    <span class="badge bg-warning">En attente</span>
+                                @endif
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -188,6 +200,35 @@
                         <i class="bi bi-check-circle me-1"></i> Valider la photo
                     </button>
                 </form>
+
+                <button type="button" class="btn btn-danger me-2" data-bs-toggle="modal" data-bs-target="#rejectPhotoModal">
+                    <i class="bi bi-x-circle me-1"></i> Rejeter la photo
+                </button>
+
+                <!-- Modal pour le rejet de photo -->
+                <div class="modal fade" id="rejectPhotoModal" tabindex="-1" aria-labelledby="rejectPhotoModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="{{ route('agents.rejeterPhoto', $agent->id) }}" method="POST">
+                                @csrf
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="rejectPhotoModalLabel">Rejeter la photo</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="motif_rejet" class="form-label">Motif du rejet</label>
+                                        <textarea class="form-control" id="motif_rejet" name="motif_rejet_photo" rows="3" required></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <button type="submit" class="btn btn-danger">Confirmer le rejet</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             @endif
         </div>
 

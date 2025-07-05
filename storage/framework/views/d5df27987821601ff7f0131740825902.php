@@ -12,6 +12,7 @@
         body {
             margin: 0;
             padding: 0;
+            font-family: sans-serif;
         }
 
         .page {
@@ -47,8 +48,12 @@
         }
 
         .qr-code {
-            width: 100%;
-            height: 35%;
+            position: absolute;
+            top: 4mm;
+            right: 4mm;
+            width: 20mm;
+            height: 20mm;
+            z-index: 10;
         }
 
         .qr-code svg {
@@ -59,8 +64,8 @@
 
         .info-container {
             position: absolute;
-            top: 21mm; 
-            left: 28mm; 
+            top: 21mm;
+            left: 28mm;
             font-size: 3.2mm;
             line-height: 1;
             z-index: 10;
@@ -128,22 +133,17 @@
 </head>
 <body>
 
-<?php
-    $recto = base64_encode(file_get_contents(public_path('storage/template/recto.png')));
-    $verso = base64_encode(file_get_contents(public_path('storage/template/verso.png')));
-    $cachet = base64_encode(file_get_contents(public_path('storage/images/cachet_ministre.png')));
-?>
-
 <!-- RECTO -->
 <div class="page">
-    <img class="full-bg" src="data:image/png;base64,<?php echo e($recto); ?>" alt="Recto">
+    <img class="full-bg" src="<?php echo e($rectoPath); ?>" alt="Recto">
 
     <div class="photo-container">
         <img class="photo" src="<?php echo e($photoPath); ?>" alt="Photo">
-        <div class="qr-code">
-            <?php echo $qrCode; ?>
+    </div>
 
-        </div>
+    <div class="qr-code">
+        <?php echo $qrCode; ?>
+
     </div>
 
     <div class="info-container">
@@ -165,7 +165,7 @@
         </div>
     </div>
 
-    <img class="cachet" src="data:image/png;base64,<?php echo e($cachet); ?>" alt="Cachet Ministère">
+    <img class="cachet" src="<?php echo e($signaturePath); ?>" alt="Cachet Ministère">
 
     <div class="footer">
         Délivrée le: <span class="date-value"><?php echo e(\Carbon\Carbon::now()->format('m/Y')); ?></span>
@@ -174,17 +174,11 @@
 
 <!-- VERSO -->
 <div class="page" style="page-break-after: avoid;">
-    <img class="full-bg" src="data:image/png;base64,<?php echo e($verso); ?>" alt="Verso">
+    <img class="full-bg" src="<?php echo e($versoPath); ?>" alt="Verso">
 
-    <div class="verso-text top">
-        Carte strictement personnelle, propriété du Ministère de la Formation Professionnelle et Technique (MFPT).<br>
-        Toute personne trouvant cette carte est priée de bien vouloir l'adresser à la Direction des ressources humaines du dit ministère.
-    </div>
+  
 
-    <div class="verso-footer">
-        Sphère ministérielle, arrondissement 2, Bâtiment C, Diamniadio, Dakar Sénégal.<br>
-        Téléphone : 33 865 70 80 • Site : https://formation.gouv.sn
-    </div>
+  
 </div>
 
 </body>

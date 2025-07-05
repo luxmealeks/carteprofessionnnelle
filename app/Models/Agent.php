@@ -18,7 +18,7 @@ class Agent extends Model
         'motif_rejet_photo',
         'fonction',
         'etablissement_id',
-        'direction_id',
+        'strucutre_id',
         'inspection_academique_id',
         'corps_id',
         'grade_id',
@@ -27,22 +27,13 @@ class Agent extends Model
         'ia',
     ];
 
- /*    public function etablissement()
-    {
-        return $this->belongsTo(Etablissement::class)->withDefault([
-            'nom' => 'Non affecté',
-            'id' => 0
-        ]);
-    } */
     public function etablissement()
     {
         return $this->belongsTo(Etablissement::class);
     }
-
-
-    public function direction()
+    public function structure()
     {
-        return $this->belongsTo(Direction::class);
+        return $this->belongsTo(Structure::class);
     }
 
     public function inspectionAcademique()
@@ -72,5 +63,6 @@ class Agent extends Model
     {return $this->belongsToMany(Lot::class, 'agent_lot', 'agent_id', 'lot_id')
         ->withTimestamps();
     }
+
 
 }

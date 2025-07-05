@@ -15,7 +15,8 @@ use App\Http\Controllers\{
     GradeController,
     AgentImportController,
     ProfileController,
-    ActivityController
+    ActivityController,
+    StructureController
 };
 use App\Livewire\Settings\{Appearance, Password, Profile};
 use App\Http\Controllers\IEFController;
@@ -192,3 +193,11 @@ Route::post('/lots/imprimer/{ia_id}', [LotController::class, 'imprimer'])->name(
 Route::post('/lots/generer', [LotController::class, 'generer'])->name('lots.generer');
 
 Route::get('/agents/{id}', [AgentController::class, 'show'])->name('agents.show');
+
+Route::get('/photos/{agent}/traiter', [PhotoController::class, 'traiter'])->name('photos.traiter');
+Route::post('/photos/{agent}/rogner', [PhotoController::class, 'rogner'])->name('photos.rogner');
+
+Route::post('/photos/{agent}/rogner-removebg', [PhotoController::class, 'rognerEtSupprimerFond'])
+    ->name('photos.rogner.removebg');
+
+    Route::resource('structures', StructureController::class);
