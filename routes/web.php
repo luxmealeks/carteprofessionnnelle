@@ -213,3 +213,35 @@ Route::post('/photos/{agent}/rogner-removebg', [PhotoController::class, 'rognerE
 
 
 
+use App\Http\Controllers\AdminController;
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+
+    // Accueil du module admin
+    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // CRUD principaux
+    Route::resources([
+        'agents'         => AgentController::class,
+        'lots'           => LotController::class,
+        'photos'         => PhotoController::class,
+        'etablissements'=> EtablissementController::class,
+        'directions'     => DirectionController::class,
+        'ias'            => InspectionAcademiqueController::class,
+        'corps'          => CorpsController::class,
+        'grades'         => GradeController::class,
+        'structures'     => StructureController::class,
+    ]);
+
+    // Autres routes utiles
+    Route::get('agents/{agent}/view-card', [AgentController::class, 'viewCard'])->name('agents.view-card');
+    Route::post('agents/bulk-validate', [AgentController::class, 'bulkValidate'])->name('agents.bulk-validate');
+    Route::get('lots/generer', [LotController::class, 'genererForm'])->name('lots.generer.form');
+    Route::post('lots/generer', [LotController::class, 'generer'])->name('lots.generer');
+    Route::post('lots/imprimer/{ia}', [LotController::class, 'imprimer'])->name('lots.imprimer');
+
+    // Paramètres utilisateur
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+});

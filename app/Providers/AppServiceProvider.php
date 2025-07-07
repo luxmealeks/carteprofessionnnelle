@@ -5,6 +5,7 @@ use App\Models\Agent;
 use App\Models\Photo;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+            Schema::defaultStringLength(191);
+
         if (config('app.env') === 'production') {
             \View::addLocation(storage_path('app/compiled_views'));
         }
