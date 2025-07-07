@@ -122,6 +122,25 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+     /*
+    |--------------------------------------------------------------------------
+    | Autoloaded Service Providers
+    |--------------------------------------------------------------------------
+    */
+// 'providers' => [
+//     Illuminate\View\ViewServiceProvider::class, // <- assure-toi qu’il est bien là
+//     Livewire\LivewireServiceProvider::class,
+//     Intervention\Image\ImageServiceProvider::class,
+// ],
 
-
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Class Aliases
+//     |--------------------------------------------------------------------------
+//     */
+//   'aliases' => [
+//     'View' => Illuminate\Support\Facades\View::class,
+//     'Blade' => Illuminate\Support\Facades\Blade::class,
+//     'Image' => Intervention\Image\Facades\Image::class,
+// ],
 ];

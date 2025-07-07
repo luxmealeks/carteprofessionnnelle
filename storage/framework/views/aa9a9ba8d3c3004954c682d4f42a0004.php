@@ -224,5 +224,4 @@
 
 
 </body>
-</html>
-<?php /**PATH /Applications/MAMP/htdocs/carteprofessionnnelle/resources/views/lots/pdf.blade.php ENDPATH**/ ?>
+</html><?php /**PATH /Applications/MAMP/htdocs/carteprofessionnnelle/resources/views/lots/pdf.blade.php ENDPATH**/ ?>

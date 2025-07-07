@@ -2,184 +2,457 @@
 
 @section('content')
 <div class="container">
-    <h2>Modifier l'agent : {{ $agent->prenom }} {{ $agent->nom }}</h2>
-
-    <form method="POST" action="{{ route('agents.update', $agent->id) }}" enctype="multipart/form-data">
-        @csrf
-        @method('PUT')
-
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="matricule" class="form-label">Matricule</label>
-                <input type="text" name="matricule" id="matricule" class="form-control" value="{{ old('matricule', $agent->matricule) }}">
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="cin" class="form-label">CIN</label>
-                <input type="text" name="cin" id="cin" class="form-control" value="{{ old('cin', $agent->cin) }}">
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="prenom" class="form-label">Prénom</label>
-                <input type="text" name="prenom" id="prenom" class="form-control" value="{{ old('prenom', $agent->prenom) }}">
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="nom" class="form-label">Nom</label>
-                <input type="text" name="nom" id="nom" class="form-control" value="{{ old('nom', $agent->nom) }}">
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" name="email" id="email" class="form-control" value="{{ old('email', $agent->email) }}">
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="telephone" class="form-label">Téléphone</label>
-                <input type="text" name="telephone" id="telephone" class="form-control" value="{{ old('telephone', $agent->telephone) }}">
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="fonction" class="form-label">Fonction</label>
-                <input type="text" name="fonction" id="fonction" class="form-control" value="{{ old('fonction', $agent->fonction) }}">
-            </div>
-
-
-            <div class="col-md-6 mb-3">
-                <label for="corps_id" class="form-label">Corps</label>
-                <select name="corps_id" id="corps_id" class="form-select">
-                    @foreach($corps as $cor)
-                    <option value="{{ $cor->id }}" {{ $agent->corps_id == $cor->id ? 'selected' : '' }}>
-                        {{ $cor->nom }}
-                    </option>
-                @endforeach
-
-                </select>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="grade_id" class="form-label">Grade</label>
-                <select name="grade_id" id="grade_id" class="form-select">
-                    @foreach($grades as $grade)
-                    <option value="{{ $grade->id }}" {{ $agent->grade_id == $grade->id ? 'selected' : '' }}>
-                        {{ $grade->nom }}
-                    </option>
-                @endforeach
-
-                </select>
-            </div>
-
-
-            <div class="col-md-6 mb-3">
-                <label for="iden" class="form-label">Service central)</label>
-                <input type="text" name="iden" id="iden" class="form-control" value="{{ old('iden', $agent->iden) }}">
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="etablissement_id" class="form-label">Établissement</label>
-                <select name="etablissement_id" id="etablissement_id" class="form-select">
-                    @foreach(App\Models\Etablissement::all() as $etab)
-                        <option value="{{ $etab->id }}" {{ $agent->etablissement_id == $etab->id ? 'selected' : '' }}>
-                            {{ $etab->nom }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="inspection_academique_id" class="form-label">Inspection Académique</label>
-                <select name="inspection_academique_id" id="inspection_academique_id" class="form-select">
-                    @foreach(App\Models\InspectionAcademique::all() as $ia)
-                        <option value="{{ $ia->id }}" {{ $agent->inspection_academique_id == $ia->id ? 'selected' : '' }}>
-                            {{ $ia->nom }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="statut_photo" class="form-label">Statut Photo</label>
-                <select name="statut_photo" id="statut_photo" class="form-select">
-                    <option value="en_attente" {{ $agent->statut_photo === 'en_attente' ? 'selected' : '' }}>En attente</option>
-                    <option value="validee" {{ $agent->statut_photo === 'validee' ? 'selected' : '' }}>Validée</option>
-                    <option value="rejetee" {{ $agent->statut_photo === 'rejetee' ? 'selected' : '' }}>Rejetée</option>
-                </select>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="motif_rejet_photo" class="form-label">Motif Rejet (si applicable)</label>
-                <input type="text" name="motif_rejet_photo" id="motif_rejet_photo" class="form-control" value="{{ old('motif_rejet_photo', $agent->motif_rejet_photo) }}">
-            </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0"><i class="bi bi-person-gear me-2"></i>Modification de l'Agent</h2>
         </div>
 
-        <!-- Champ pour transmettre l'image recadrée en base64 -->
-        <input type="hidden" name="cropped_photo" id="cropped_photo">
+        <div class="card-body">
+            <form action="{{ route('agents.update', $agent->id) }}" method="POST" enctype="multipart/form-data" id="agent-form">
+                @csrf
+                @method('PUT')
 
-        <div class="mb-3">
-            <label for="new_photo" class="form-label">Remplacer la photo</label>
-            <input type="file" id="new_photo" accept="image/*" class="form-control">
+                <div class="row g-3">
+                    <!-- Section 1: Informations de base -->
+                    <div class="col-md-6">
+                        <h5 class="border-bottom pb-2 mb-3 text-primary">Informations Personnelles</h5>
+
+                        <div class="mb-3">
+                            <label class="form-label">Matricule</label>
+                            <input type="text" name="matricule" class="form-control" value="{{ old('matricule', $agent->matricule) }}" maxlength="20">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">CIN</label>
+                            <input type="text" name="cin" class="form-control" value="{{ old('cin', $agent->cin) }}" maxlength="20">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nom <span class="text-danger">*</span></label>
+                            <input type="text" name="nom" class="form-control" value="{{ old('nom', $agent->nom) }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Prénom <span class="text-danger">*</span></label>
+                            <input type="text" name="prenom" class="form-control" value="{{ old('prenom', $agent->prenom) }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Date de Naissance</label>
+                            <input type="date" name="date_naissance" class="form-control" value="{{ old('date_naissance', $agent->date_naissance) }}">
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Photo et contacts -->
+                    <div class="col-md-6">
+                        <h5 class="border-bottom pb-2 mb-3 text-primary">Photo & Contacts</h5>
+
+                        <div class="mb-3">
+                            <label class="form-label">Photo actuelle</label>
+                            @if($agent->photo)
+                                <div class="mb-2">
+                                    <img src="{{ asset('storage/' . $agent->photo) }}" alt="Photo de l'agent" style="max-width: 150px; max-height: 150px;" class="img-thumbnail">
+                                </div>
+                            @else
+                                <p class="text-muted">Aucune photo disponible</p>
+                            @endif
+                            
+                            <label class="form-label">Remplacer la photo</label>
+                            <input type="file" name="photo" class="form-control" accept="image/jpeg,image/png">
+                            <small class="text-muted">Format: JPEG ou PNG (max 2MB)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ old('email', $agent->email) }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Téléphone <span class="text-danger">*</span></label>
+                            <input type="tel" name="telephone" class="form-control" value="{{ old('telephone', $agent->telephone) }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Adresse</label>
+                            <textarea name="adresse" class="form-control" rows="2">{{ old('adresse', $agent->adresse) }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Informations professionnelles -->
+                    <div class="col-12">
+                        <h5 class="border-bottom pb-2 mb-3 text-primary">Informations Professionnelles</h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Fonction <span class="text-danger">*</span></label>
+                                <input type="text" name="fonction" class="form-control" value="{{ old('fonction', $agent->fonction) }}" required>
+                            </div>
+
+                            <!-- Corps -->
+    <div class="col-md-4">
+        <label class="form-label">Corps</label>
+        <select name="corps_id" class="form-select select-enhanced">
+            <option value="">Sélectionner un corps</option>
+            @foreach($corps as $corpsItem)
+                <option value="{{ $corpsItem->id }}" {{ old('corps_id', $agent->corps_id) == $corpsItem->id ? 'selected' : '' }}>
+                    {{ $corpsItem->libelle }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <!-- Grade -->
+    <div class="col-md-4">
+        <label class="form-label">Grade</label>
+        <select name="grade_id" class="form-select select-enhanced">
+            <option value="">Sélectionner un grade</option>
+            @foreach($grades as $grade)
+                <option value="{{ $grade->id }}" {{ old('grade_id', $agent->grade_id) == $grade->id ? 'selected' : '' }}>
+                    {{ $grade->libelle }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+</div>
+
+                        <div class="row g-3 mt-2">
+                            <!-- Structure -->
+                            <div class="col-md-4">
+                                <label for="structure_id" class="form-label">Structure</label>
+                                <select name="structure_id" class="form-select" id="structure-select">
+                                    <option value="">-- Aucune structure --</option>
+                                    @foreach($structures as $structure)
+                                        <option value="{{ $structure->id }}" {{ old('structure_id', $agent->structure_id) == $structure->id ? 'selected' : '' }}>
+                                            {{ $structure->nom }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Inspection Académique -->
+                            <div class="col-md-4" id="inspection-wrapper">
+                                <label class="form-label">Inspection Académique</label>
+                                <select name="inspection_academique_id" id="inspection-select" class="form-select">
+                                    <option value="">Sélectionner une IA</option>
+                                    @foreach($inspectionAcademiques as $ia)
+                                        <option value="{{ $ia->id }}" {{ old('inspection_academique_id', $agent->inspection_academique_id) == $ia->id ? 'selected' : '' }}>
+                                            {{ $ia->nom }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Établissement -->
+                            <div class="col-md-4" id="etablissement-wrapper">
+                                <label class="form-label">Établissement</label>
+                                <select name="etablissement_id" id="etablissement-select" class="form-select">
+                                    <option value="">Sélectionner un établissement</option>
+                                    @foreach($etablissements as $etablissement)
+                                        <option value="{{ $etablissement->id }}" {{ old('etablissement_id', $agent->etablissement_id) == $etablissement->id ? 'selected' : '' }}>
+                                            {{ $etablissement->nom }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-4">
+                                <label class="form-label">Service central</label>
+                                <input type="text" name="iden" class="form-control" value="{{ old('iden', $agent->iden) }}">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Statut Photo</label>
+                                <select name="statut_photo" class="form-select">
+                                    <option value="en_attente" {{ old('statut_photo', $agent->statut_photo) === 'en_attente' ? 'selected' : '' }}>En attente</option>
+                                    <option value="validee" {{ old('statut_photo', $agent->statut_photo) === 'validee' ? 'selected' : '' }}>Validée</option>
+                                    <option value="rejetee" {{ old('statut_photo', $agent->statut_photo) === 'rejetee' ? 'selected' : '' }}>Rejetée</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Motif de rejet photo (si applicable)</label>
+                                <input type="text" name="motif_rejet_photo" class="form-control" value="{{ old('motif_rejet_photo', $agent->motif_rejet_photo) }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Champ pour transmettre l'image recadrée en base64 -->
+                <input type="hidden" name="cropped_photo" id="cropped_photo">
+
+                <!-- Conteneur pour le recadrage d'image -->
+                <div id="crop-container" class="mb-3 mt-3" style="display: none;">
+                    <p class="text-muted">Recadrez la photo avant de sauvegarder :</p>
+                    <div style="max-width: 100%;">
+                        <img id="preview-image" style="max-width: 100%;">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ route('agents.index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Retour
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i> Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <div id="crop-container" class="mb-3" style="display: none;">
-            <p class="text-muted">Recadrez la photo avant de sauvegarder :</p>
-            <div style="max-width: 100%;">
-                <img id="preview-image" style="max-width: 100%;">
-            </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-3">Enregistrer les modifications</button>
-    </form>
+    </div>
 </div>
 @endsection
 
 @push('styles')
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<style>
+    .form-label {
+        font-weight: 500;
+    }
+    .card-header {
+        border-radius: 0.375rem 0.375rem 0 0 !important;
+    }
+    .is-invalid {
+        border-color: #dc3545;
+    }
+    #preview-image {
+        max-height: 400px;
+    }
+    
+    /* Styles pour les selects */
+    select.form-select, 
+    select.form-select option {
+        background-color: #fff !important;
+        color: #212529 !important;
+    }
+    
+    select.form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+</style>
 @endpush
-
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
-    let cropper;
-    const input = document.getElementById('new_photo');
+document.addEventListener('DOMContentLoaded', function () {
+    // ----- Gestion du crop d'image -----
+    const inputPhoto = document.querySelector('input[name="photo"]');
     const previewImage = document.getElementById('preview-image');
     const cropContainer = document.getElementById('crop-container');
     const croppedPhotoInput = document.getElementById('cropped_photo');
+    let cropper;
 
-    input.addEventListener('change', function (e) {
-        const file = e.target.files[0];
-        if (!file) return;
+    if (inputPhoto) {
+        inputPhoto.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            previewImage.src = e.target.result;
-            cropContainer.style.display = 'block';
+            if (file.size > 2 * 1024 * 1024 || !['image/jpeg', 'image/png'].includes(file.type)) {
+                alert('Seuls les fichiers JPEG ou PNG de moins de 2 Mo sont autorisés.');
+                this.value = '';
+                return;
+            }
 
-            previewImage.onload = function () {
-                if (cropper) cropper.destroy();
-
-                cropper = new Cropper(previewImage, {
-    aspectRatio: NaN,
-    viewMode: 1,
-    autoCropArea: 0.8,
-    movable: true,
-    zoomable: true,
-    scalable: true,
-    cropBoxResizable: true,
-    cropBoxMovable: true,
-    cropend() {
-        cropper.getCroppedCanvas().toBlob(blob => {
             const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = () => {
-                croppedPhotoInput.value = reader.result;
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;
+                cropContainer.style.display = 'block';
+
+                previewImage.onload = function () {
+                    if (cropper) cropper.destroy();
+
+                    cropper = new Cropper(previewImage, {
+                        aspectRatio: NaN,
+                        viewMode: 1,
+                        autoCropArea: 0.8,
+                        movable: true,
+                        zoomable: true,
+                        scalable: true,
+                        cropBoxResizable: true,
+                        cropBoxMovable: true,
+                        cropend() {
+                            cropper.getCroppedCanvas().toBlob(blob => {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                    croppedPhotoInput.value = reader.result;
+                                };
+                                reader.readAsDataURL(blob);
+                            }, 'image/jpeg');
+                        }
+                    });
+                };
             };
-        }, 'image/jpeg');
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // ----- Validation des champs obligatoires -----
+    document.getElementById('agent-form').addEventListener('submit', function (e) {
+        let isValid = true;
+        this.querySelectorAll('[required]').forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('Veuillez remplir tous les champs obligatoires.');
+        }
+    });
+
+    // ----- Masquer IA + établissement si structure sélectionnée -----
+    const structureSelect = document.getElementById('structure-select');
+    const inspectionWrapper = document.getElementById('inspection-wrapper');
+    const etablissementWrapper = document.getElementById('etablissement-wrapper');
+
+    function toggleVisibility() {
+        const hasStructure = structureSelect && structureSelect.value;
+        inspectionWrapper.style.display = hasStructure ? 'none' : 'block';
+        etablissementWrapper.style.display = hasStructure ? 'none' : 'block';
+
+        const inspectionSelect = inspectionWrapper.querySelector('select');
+        const etablissementSelect = etablissementWrapper.querySelector('select');
+
+        if (hasStructure) {
+            inspectionSelect.removeAttribute('required');
+            etablissementSelect.removeAttribute('required');
+        } else {
+            inspectionSelect.setAttribute('required', 'required');
+            etablissementSelect.setAttribute('required', 'required');
+        }
+    }
+
+    if (structureSelect) {
+        structureSelect.addEventListener('change', toggleVisibility);
+        toggleVisibility(); // appel initial
+    }
+
+    // ----- Chargement dynamique des établissements selon IA -----
+    const inspectionSelect = document.getElementById('inspection-select');
+    const etablissementSelect = document.getElementById('etablissement-select');
+
+    if (inspectionSelect && etablissementSelect) {
+        inspectionSelect.addEventListener('change', function() {
+            const iaId = this.value;
+            etablissementSelect.innerHTML = '<option value="">Chargement...</option>';
+            etablissementSelect.disabled = true;
+
+            if (!iaId) {
+                etablissementSelect.innerHTML = '<option value="">Sélectionnez une IA</option>';
+                etablissementSelect.disabled = false;
+                return;
+            }
+
+            const iaData = @json($inspectionAcademiques);
+            const selectedIa = iaData.find(ia => ia.id == iaId);
+            
+            if (selectedIa && selectedIa.etablissements) {
+                etablissementSelect.innerHTML = '<option value="">Sélectionner un établissement</option>';
+                selectedIa.etablissements.forEach(etab => {
+                    const option = new Option(etab.nom, etab.id);
+                    etablissementSelect.add(option);
+                });
+
+                const prevValue = "{{ old('etablissement_id', $agent->etablissement_id) }}";
+                if (prevValue) etablissementSelect.value = prevValue;
+
+                etablissementSelect.disabled = false;
+            } else {
+                fetch(`/api/etablissements?inspection_academique_id=${iaId}`, {
+                    headers: { 
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Erreur réseau');
+                    return response.json();
+                })
+                .then(data => {
+                    etablissementSelect.innerHTML = '<option value="">Sélectionner un établissement</option>';
+                    if (data.data && data.data.length) {
+                        data.data.forEach(etab => {
+                            const option = new Option(etab.nom, etab.id);
+                            etablissementSelect.add(option);
+                        });
+                    }
+
+                    const prevValue = "{{ old('etablissement_id', $agent->etablissement_id) }}";
+                    if (prevValue) etablissementSelect.value = prevValue;
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    etablissementSelect.innerHTML = '<option value="">Erreur de chargement</option>';
+                })
+                .finally(() => {
+                    etablissementSelect.disabled = false;
+                });
+            }
+        });
+
+        if (inspectionSelect.value) {
+            inspectionSelect.dispatchEvent(new Event('change'));
+        }
     }
 });
+// Ajoutez cette fonction pour réinitialiser les champs
+function resetDependentFields() {
+    const structureSelect = document.getElementById('structure-select');
+    const inspectionSelect = document.getElementById('inspection-select');
+    const etablissementSelect = document.getElementById('etablissement-select');
+    
+    if (structureSelect.value) {
+        inspectionSelect.value = '';
+        etablissementSelect.value = '';
+    }
+}
 
-            };
-        };
-        reader.readAsDataURL(file);
-    });
+// Modifiez la fonction toggleVisibility
+function toggleVisibility() {
+    const hasStructure = structureSelect && structureSelect.value;
+    inspectionWrapper.style.display = hasStructure ? 'none' : 'block';
+    etablissementWrapper.style.display = hasStructure ? 'none' : 'block';
+
+    if (hasStructure) {
+        inspectionSelect.value = '';
+        etablissementSelect.value = '';
+    }
+    
+    // Appel initial et écouteur d'événement
+    if (structureSelect) {
+        structureSelect.addEventListener('change', function() {
+            toggleVisibility();
+            resetDependentFields();
+        });
+    }
+}
+// Ajoutez ceci à la fin de votre script
+document.getElementById('agent-form').addEventListener('submit', function(e) {
+    const structureId = document.getElementById('structure-select').value;
+    const inspectionId = document.getElementById('inspection-select').value;
+    
+    // Validation supplémentaire côté client
+    if (!structureId && !inspectionId) {
+        e.preventDefault();
+        alert('Vous devez sélectionner soit une Structure, soit une Inspection Académique');
+        return false;
+    }
+    
+    // Nettoyage des champs avant soumission
+    if (structureId) {
+        document.getElementById('inspection-select').disabled = true;
+        document.getElementById('etablissement-select').disabled = true;
+    }
+});
 </script>
+
+
+
+
 @endpush

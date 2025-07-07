@@ -15,7 +15,8 @@ use App\Http\Controllers\{
     GradeController,
     AgentImportController,
     ProfileController,
-    ActivityController
+    ActivityController,
+    StructureController
 };
 use App\Livewire\Settings\{Appearance, Password, Profile};
 use App\Http\Controllers\IEFController;
@@ -192,3 +193,55 @@ Route::post('/lots/imprimer/{ia_id}', [LotController::class, 'imprimer'])->name(
 Route::post('/lots/generer', [LotController::class, 'generer'])->name('lots.generer');
 
 Route::get('/agents/{id}', [AgentController::class, 'show'])->name('agents.show');
+
+Route::get('/photos/{agent}/traiter', [PhotoController::class, 'traiter'])->name('photos.traiter');
+Route::post('/photos/{agent}/rogner', [PhotoController::class, 'rogner'])->name('photos.rogner');
+
+Route::post('/photos/{agent}/rogner-removebg', [PhotoController::class, 'rognerEtSupprimerFond'])
+    ->name('photos.rogner.removebg');
+
+    Route::resource('structures', StructureController::class);
+
+
+    Route::prefix('photos')->group(function() {
+        Route::get('/validation', [PhotoController::class, 'index'])->name('photos.validation');
+        Route::post('/valider/{agent}', [PhotoController::class, 'valider'])->name('photos.valider');
+        Route::post('/rejeter/{agent}', [PhotoController::class, 'rejeter'])->name('photos.rejeter');
+        Route::get('/recadrer/{agent}', [PhotoController::class, 'recadrer'])->name('photos.recadrer');
+        Route::put('/recadrer/{agent}', [PhotoController::class, 'updateCrop'])->name('photos.update-crop');
+    });
+
+
+
+use App\Http\Controllers\AdminController;
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+
+    // Accueil du module admin
+    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // CRUD principaux
+    Route::resources([
+        'agents'         => AgentController::class,
+        'lots'           => LotController::class,
+        'photos'         => PhotoController::class,
+        'etablissements'=> EtablissementController::class,
+        'directions'     => DirectionController::class,
+        'ias'            => InspectionAcademiqueController::class,
+        'corps'          => CorpsController::class,
+        'grades'         => GradeController::class,
+        'structures'     => StructureController::class,
+    ]);
+
+    // Autres routes utiles
+    Route::get('agents/{agent}/view-card', [AgentController::class, 'viewCard'])->name('agents.view-card');
+    Route::post('agents/bulk-validate', [AgentController::class, 'bulkValidate'])->name('agents.bulk-validate');
+    Route::get('lots/generer', [LotController::class, 'genererForm'])->name('lots.generer.form');
+    Route::post('lots/generer', [LotController::class, 'generer'])->name('lots.generer');
+    Route::post('lots/imprimer/{ia}', [LotController::class, 'imprimer'])->name('lots.imprimer');
+
+    // Paramètres utilisateur
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+});

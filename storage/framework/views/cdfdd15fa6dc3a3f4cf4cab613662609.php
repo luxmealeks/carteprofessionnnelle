@@ -28,22 +28,44 @@
     <?php echo $__env->make('partials.alerts', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <?php if(request()->anyFilled(['search', 'statut', 'affectation', 'sort'])): ?>
-<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
-    <strong>Filtres actifs :</strong>
-    <?php $__currentLoopData = request()->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <?php if(in_array($key, ['search', 'statut', 'affectation', 'sort']) && !empty($value)): ?>
-            <span class="badge bg-primary me-1">
-                <?php echo e($key); ?>: <?php echo e($value); ?>
+    <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+        <strong>Filtres actifs :</strong>
+        <?php $__currentLoopData = request()->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php if(in_array($key, ['search', 'statut', 'affectation', 'sort']) && !empty($value)): ?>
+                <span class="badge bg-primary me-1">
+                    <?php if($key === 'affectation' && Str::startsWith($value, 'etablissement_')): ?>
+                        <?php
+                            $etablissementId = Str::after($value, 'etablissement_');
+                            $etablissement = $etablissements->firstWhere('id', $etablissementId);
+                            $displayValue = $etablissement ? 'Établissement: '.$etablissement->nom : $value;
+                        ?>
+                        <?php echo e($displayValue); ?>
 
-            </span>
-        <?php endif; ?>
-    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    <a href="<?php echo e(route('agents.index')); ?>" class="btn btn-sm btn-outline-light ms-2">
-        <i class="bi bi-x-lg"></i> Réinitialiser
-    </a>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-<?php endif; ?>
+                    <?php elseif($key === 'sort'): ?>
+                        <?php
+                            $sortOptions = [
+                                'nom_asc' => 'Nom (A-Z)',
+                                'nom_desc' => 'Nom (Z-A)',
+                                'date_asc' => 'Plus anciens',
+                                'date_desc' => 'Plus récents'
+                            ];
+                            $displayValue = $sortOptions[$value] ?? $value;
+                        ?>
+                        Trier par: <?php echo e($displayValue); ?>
+
+                    <?php else: ?>
+                        <?php echo e(ucfirst($key)); ?>: <?php echo e($value); ?>
+
+                    <?php endif; ?>
+                </span>
+            <?php endif; ?>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        <a href="<?php echo e(route('agents.index')); ?>" class="btn btn-sm btn-outline-light ms-2">
+            <i class="bi bi-x-lg"></i> Réinitialiser
+        </a>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php endif; ?>
 
     <!-- Filters Section -->
     <div class="card mb-4 border-0 shadow-sm">
@@ -106,35 +128,26 @@
     <!-- Agents Table -->
     <div class="card shadow-sm border-0 overflow-hidden">
         <div class="card-body p-0">
-            <!-- Agents Table -->
-<div class="card shadow-sm border-0 overflow-hidden">
-    <div class="card-body p-0">
-        <!-- Message aucun résultat -->
-        <?php if($agents->isEmpty() && request()->anyFilled(['search', 'statut', 'affectation'])): ?>
-        <div class="alert alert-warning m-4">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            Aucun agent ne correspond à vos critères de recherche.
-            <a href="<?php echo e(route('agents.index')); ?>" class="alert-link">Réinitialiser les filtres</a>
-        </div>
-        <?php endif; ?>
+            <?php if($agents->isEmpty() && request()->anyFilled(['search', 'statut', 'affectation'])): ?>
+            <div class="alert alert-warning m-4">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Aucun agent ne correspond à vos critères de recherche.
+                <a href="<?php echo e(route('agents.index')); ?>" class="alert-link">Réinitialiser les filtres</a>
+            </div>
+            <?php endif; ?>
 
-
-    </div>
-</div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th width="60" class="text-center">Photo</th>
-                            <th>Matricule</th>
-                            <th>Nom & Prénom</th>
-                            <th>CIN</th>
-                            <th>Contact</th>
-                            <th>Fonction</th>
-                            <th>Corps</th>
-                            <th>Grade</th>
-                            <th>Affectation</th>
-                            <th>Statut</th>
+                            <th width="120">Matricule</th>
+                            <th>Nom Complet</th>
+                            <th width="120">CIN</th>
+                            <th width="180">Contact</th>
+                            <th width="220">Fonction</th>
+                            <th width="200">Affectation</th>
+                            <th width="120">Statut</th>
                             <th width="140" class="text-end">Actions</th>
                         </tr>
                     </thead>
@@ -142,14 +155,16 @@
                         <?php $__empty_1 = true; $__currentLoopData = $agents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $agent): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <tr>
                             <!-- Photo -->
-                            <td class="text-center">
+                            <td class="text-center" data-label="Photo">
                                 <div class="avatar-wrapper">
                                     <?php if($agent->photo): ?>
                                         <img src="<?php echo e(asset('storage/'.$agent->photo)); ?>"
                                              alt="Photo de <?php echo e($agent->prenom); ?> <?php echo e($agent->nom); ?>"
                                              class="avatar-img"
                                              data-bs-toggle="modal"
-                                             data-bs-target="#photoModal<?php echo e($agent->id); ?>">
+                                             data-bs-target="#photoModal"
+                                             data-agent-name="<?php echo e($agent->prenom); ?> <?php echo e($agent->nom); ?>"
+                                             data-photo-url="<?php echo e(asset('storage/'.$agent->photo)); ?>">
                                     <?php else: ?>
                                         <div class="avatar-placeholder">
                                             <i class="bi bi-person"></i>
@@ -158,142 +173,153 @@
                                 </div>
                             </td>
 
-                            <!-- Identification -->
-                            <td>
-                                <span class="fw-semibold"><?php echo e($agent->matricule); ?></span>
+                            <!-- Matricule -->
+                            <td data-label="Matricule">
+                                <span class="fw-semibold badge bg-light text-dark"><?php echo e($agent->matricule); ?></span>
                             </td>
 
-                            <td>
+                            <!-- Nom complet -->
+                            <td data-label="Nom">
                                 <div class="d-flex flex-column">
                                     <span class="fw-semibold"><?php echo e($agent->nom); ?></span>
                                     <small class="text-muted"><?php echo e($agent->prenom); ?></small>
                                 </div>
                             </td>
 
-                            <td><?php echo e($agent->cin ?? 'N/A'); ?></td>
+                            <!-- CIN -->
+                            <td data-label="CIN">
+                                <span class="badge bg-light text-dark"><?php echo e($agent->cin ?? 'N/A'); ?></span>
+                            </td>
 
                             <!-- Contact -->
-                            <td>
-                                <div class="d-flex flex-column">
+                            <td data-label="Contact">
+                                <div class="d-flex flex-column small">
                                     <?php if($agent->email): ?>
-                                        <a href="mailto:<?php echo e($agent->email); ?>" class="text-primary text-decoration-none">
-                                            <small><i class="bi bi-envelope me-1"></i><?php echo e($agent->email); ?></small>
+                                        <a href="mailto:<?php echo e($agent->email); ?>" class="text-truncate text-primary text-decoration-none" title="<?php echo e($agent->email); ?>">
+                                            <i class="bi bi-envelope me-1"></i><?php echo e(Str::limit($agent->email, 15)); ?>
+
                                         </a>
                                     <?php endif; ?>
                                     <?php if($agent->telephone): ?>
-                                        <small><i class="bi bi-telephone me-1"></i><?php echo e($agent->telephone); ?></small>
+                                        <span class="text-truncate" title="<?php echo e($agent->telephone); ?>">
+                                            <i class="bi bi-telephone me-1"></i><?php echo e($agent->telephone); ?>
+
+                                        </span>
                                     <?php endif; ?>
                                 </div>
                             </td>
 
                             <!-- Fonction -->
-                            <td>
-                                <span class="d-block"><?php echo e($agent->fonction ?? 'N/A'); ?></span>
-                                <small class="text-muted">
-                                    <?php echo e($agent->corps->nom ?? ''); ?> <?php echo e($agent->grade->nom ?? ''); ?>
-
-                                </small>
-                            </td>
-                            <!-- Corps -->
-                            <td><?php echo e($agent->corps->nom ?? 'N/A'); ?></td>
-
-                            <!-- Grade -->
-                            <td><?php echo e($agent->grade->nom ?? 'N/A'); ?></td>
-
-
-                            <!-- Affectation -->
-                            <td>
+                            <td data-label="Fonction">
                                 <div class="d-flex flex-column">
-                                    <span><?php echo e($agent->etablissement->nom ?? $agent->direction->nom ?? 'N/A'); ?></span>
-                                    <small class="text-muted"><?php echo e($agent->inspectionAcademique->nom ?? ''); ?></small>
+                                    <span class="fw-semibold"><?php echo e($agent->fonction ?? 'N/A'); ?></span>
+                                    <small class="text-muted">
+                                        <?php echo e($agent->corps->nom ?? ''); ?> / <?php echo e($agent->grade->nom ?? ''); ?>
+
+                                    </small>
                                 </div>
                             </td>
 
+                            <!-- Affectation -->
+                            <td data-label="Affectation">
+                                <div class="d-flex flex-column">
+                                    <span class="fw-semibold">
+                                        <?php if($agent->structure_id && $agent->relationLoaded('structure') && $agent->structure): ?>
+                                            Structure : <?php echo e($agent->structure->nom); ?>
+
+                                        <?php elseif($agent->etablissement_id && $agent->relationLoaded('etablissement') && $agent->etablissement): ?>
+                                            Établissement : <?php echo e($agent->etablissement->nom); ?>
+
+                                        <?php else: ?>
+                                            N/A
+                                        <?php endif; ?>
+                                    </span>
+                                    
+                                    <small class="text-muted">
+                                        <?php if($agent->relationLoaded('inspectionAcademique') && $agent->inspectionAcademique): ?>
+                                            <?php echo e($agent->inspectionAcademique->nom); ?>
+
+                                        <?php elseif($agent->relationLoaded('etablissement') && $agent->etablissement && $agent->etablissement->relationLoaded('inspectionAcademique') && $agent->etablissement->inspectionAcademique): ?>
+                                            <?php echo e($agent->etablissement->inspectionAcademique->nom); ?>
+
+                                        <?php endif; ?>
+                                    </small>
+                                </div>
+                            </td>
+                            
+
+
                             <!-- Statut -->
-                            <td>
+                            <td data-label="Statut">
                                 <?php if($agent->statut_photo === 'validee'): ?>
-                                    <span class="badge bg-success bg-opacity-10 text-success">
-                                        <i class="bi bi-check-circle-fill me-1"></i> Validée
+                                    <span class="badge bg-success bg-opacity-10 text-success d-flex align-items-center">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Validé
                                     </span>
                                 <?php elseif($agent->statut_photo === 'rejetee'): ?>
-                                    <span class="badge bg-danger bg-opacity-10 text-danger">
-                                        <i class="bi bi-x-circle-fill me-1"></i> Rejetée
+                                    <span class="badge bg-danger bg-opacity-10 text-danger d-flex align-items-center">
+                                        <i class="bi bi-x-circle-fill me-1"></i> Rejeté
                                     </span>
-                                    <?php if($agent->motif_rejet_photo): ?>
-                                        <div class="text-muted small mt-1" data-bs-toggle="tooltip" title="<?php echo e($agent->motif_rejet_photo); ?>">
-                                            <?php echo e(Str::limit($agent->motif_rejet_photo, 20)); ?>
-
-                                        </div>
-                                    <?php endif; ?>
                                 <?php else: ?>
-                                    <span class="badge bg-warning bg-opacity-10 text-warning">
+                                    <span class="badge bg-warning bg-opacity-10 text-warning d-flex align-items-center">
                                         <i class="bi bi-hourglass-split me-1"></i> En attente
                                     </span>
                                 <?php endif; ?>
                             </td>
-
-                            <!-- Actions -->
-                            <td class="text-end">
+                            <td class="text-end" data-label="Actions">
                                 <div class="d-flex justify-content-end gap-1">
+                                    <!-- Bouton Traiter -->
+                                 
+                                    
+                                    <!-- Bouton Voir -->
                                     <a href="<?php echo e(route('agents.show', $agent->id)); ?>"
-                                       class="btn btn-icon btn-sm btn-outline-primary"
+                                       class="btn btn-xs btn-icon btn-primary"
                                        data-bs-toggle="tooltip"
-                                       title="Voir détails">
-                                        <i class="bi bi-eye"></i>
+                                       title="Voir fiche">
+                                        <i class="bi bi-eye-fill"></i>
                                     </a>
+                                    
+                                    <!-- Bouton Modifier -->
                                     <a href="<?php echo e(route('agents.edit', $agent->id)); ?>"
-                                       class="btn btn-icon btn-sm btn-outline-secondary"
+                                       class="btn btn-xs btn-icon btn-secondary"
                                        data-bs-toggle="tooltip"
                                        title="Modifier">
-                                        <i class="bi bi-pencil"></i>
+                                        <i class="bi bi-pencil-fill"></i>
                                     </a>
-                                    <?php if($agent->statut_photo === 'en_attente'): ?>
-                                        <form action="<?php echo e(route('agents.validerPhoto', $agent->id)); ?>" method="POST">
-                                            <?php echo csrf_field(); ?>
-                                            <button type="submit"
-                                                    class="btn btn-icon btn-sm btn-outline-success"
-                                                    data-bs-toggle="tooltip"
-                                                    title="Valider photo">
-                                                <i class="bi bi-check-lg"></i>
-                                            </button>
-                                        </form>
-                                    <?php endif; ?>
+                                    
+                                    <!-- Bouton Carte (conditionnel) -->
                                     <?php if($agent->statut_photo === 'validee'): ?>
-                                        <a href="<?php echo e(route('agents.generateCard', $agent->id)); ?>"
-                                           class="btn btn-icon btn-sm btn-outline-info"
-                                           data-bs-toggle="tooltip"
-                                           title="Générer la carte">
-                                            <i class="bi bi-person-badge"></i>
-                                        </a>
+                                    <a href="<?php echo e(route('agents.generateCard', $agent->id)); ?>"
+                                       class="btn btn-xs btn-icon btn-success"
+                                       data-bs-toggle="tooltip"
+                                       title="Générer carte">
+                                        <i class="bi bi-person-badge-fill"></i>
+                                    </a>
                                     <?php endif; ?>
                                 </div>
                             </td>
+                            
+                            <style>
+                                /* Boutons ultra-compacts */
+                                .btn-xs {
+                                    padding: 0.25rem 0.35rem;
+                                    font-size: 0.75rem;
+                                    line-height: 1;
+                                    border-radius: 3px;
+                                }
+                                
+                                /* Icônes légèrement plus petites */
+                                .btn-icon i {
+                                    font-size: 0.9em;
+                                    vertical-align: middle;
+                                }
+                                
+                                /* Effet hover discret */
+                                .btn-icon:hover {
+                                    transform: scale(1.1);
+                                    transition: transform 0.15s ease;
+                                }
+                            </style>
                         </tr>
-
-                        <!-- Photo Modal -->
-                        <div class="modal fade" id="photoModal<?php echo e($agent->id); ?>" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Photo de <?php echo e($agent->prenom); ?> <?php echo e($agent->nom); ?></h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img src="<?php echo e(asset('storage/'.$agent->photo)); ?>"
-                                             class="img-fluid rounded"
-                                             alt="Photo de <?php echo e($agent->prenom); ?> <?php echo e($agent->nom); ?>">
-                                    </div>
-                                    <div class="modal-footer">
-                                        <a href="<?php echo e(asset('storage/'.$agent->photo)); ?>"
-                                           download="photo_<?php echo e($agent->matricule); ?>.jpg"
-                                           class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-download me-1"></i> Télécharger
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="9" class="text-center py-5">
@@ -312,7 +338,7 @@
             </div>
 
             <!-- Pagination -->
-            <?php if($agents->hasPages()): ?>
+            <?php if($agents->total() > $agents->perPage()): ?>
                 <div class="card-footer bg-white border-top">
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center py-2">
                         <div class="mb-2 mb-md-0">
@@ -349,7 +375,7 @@
                     <label for="fichier" class="form-label">Fichier Excel</label>
                     <input type="file" name="fichier" id="fichier" class="form-control" required
                            accept=".xlsx,.xls,.csv" data-accept=".xlsx,.xls,.csv">
-                    <div class="form-text">Formats acceptés: .xlsx, .xls, .csv</div>
+                    <div class="form-text">Formats acceptés: .xlsx, .xls, .csv (Max 5MB)</div>
                 </div>
                 <div class="alert alert-info small mb-0">
                     <i class="bi bi-info-circle-fill me-1"></i>
@@ -364,6 +390,27 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Single Photo Modal -->
+<div class="modal fade" id="photoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="photoModalTitle">Photo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalPhotoImg" src="" class="img-fluid rounded" alt="">
+            </div>
+            <div class="modal-footer">
+                <a id="modalDownloadLink" href="#" download class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-download me-1"></i> Télécharger
+                </a>
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
     </div>
 </div>
 <?php $__env->stopSection(); ?>
@@ -383,18 +430,20 @@
         white-space: nowrap;
         background-color: #f8fafc;
         border-bottom-width: 1px;
+        padding: 0.75rem 0.5rem;
+        position: relative;
     }
 
     .table td {
         font-size: 0.875rem;
         vertical-align: middle;
-        padding: 1rem 0.75rem;
+        padding: 0.75rem 0.5rem;
     }
 
     /* Avatar styling */
     .avatar-wrapper {
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
         margin: 0 auto;
         cursor: pointer;
         transition: transform 0.2s;
@@ -429,6 +478,7 @@
         font-weight: 500;
         letter-spacing: 0.3px;
         padding: 0.35em 0.65em;
+        font-size: 0.75em;
     }
 
     /* Action buttons */
@@ -462,13 +512,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.75rem;
+            padding: 0.5rem;
             border-bottom: 1px solid #f8f9fa;
         }
 
         .table td::before {
             content: attr(data-label);
-            font-weight: 600;
+            min-width: 120px;
+            font-weight: 500;
             margin-right: 1rem;
             color: #495057;
             font-size: 0.8rem;
@@ -481,13 +532,18 @@
         .avatar-wrapper {
             margin: 0;
         }
+
+        .btn-group .btn {
+            padding: 0.2rem 0.4rem;
+            font-size: 0.875rem;
+        }
     }
 </style>
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startPush('scripts'); ?>
 <script>
-    // Activer les tooltips
+    // Activer les tooltips et gérer la modale photo
     document.addEventListener('DOMContentLoaded', function() {
         // Tooltips
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -499,11 +555,41 @@
         document.getElementById('fichier').addEventListener('change', function(e) {
             const file = e.target.files[0];
             const acceptedTypes = this.getAttribute('data-accept').split(',');
+            const maxSize = 5 * 1024 * 1024; // 5MB
 
-            if (file && !acceptedTypes.some(type => file.name.endsWith(type))) {
-                alert('Veuillez sélectionner un fichier Excel (.xlsx, .xls) ou CSV');
-                this.value = '';
+            if (file) {
+                // Vérifier le type
+                if (!acceptedTypes.some(type => file.name.endsWith(type))) {
+                    alert('Veuillez sélectionner un fichier Excel (.xlsx, .xls) ou CSV');
+                    this.value = '';
+                    return;
+                }
+
+                // Vérifier la taille
+                if (file.size > maxSize) {
+                    alert('Le fichier est trop volumineux (max 5MB)');
+                    this.value = '';
+                }
             }
+        });
+
+        // Gestion de la modale photo unique
+        const photoModal = new bootstrap.Modal(document.getElementById('photoModal'));
+        const modalTitle = document.getElementById('photoModalTitle');
+        const modalImg = document.getElementById('modalPhotoImg');
+        const downloadLink = document.getElementById('modalDownloadLink');
+        
+        document.querySelectorAll('[data-bs-target="#photoModal"]').forEach(trigger => {
+            trigger.addEventListener('click', function() {
+                const agentName = this.getAttribute('data-agent-name');
+                const photoUrl = this.getAttribute('data-photo-url');
+                
+                modalTitle.textContent = `Photo de ${agentName}`;
+                modalImg.src = photoUrl;
+                modalImg.alt = `Photo de ${agentName}`;
+                downloadLink.href = photoUrl;
+                downloadLink.download = `photo_${agentName.replace(/\s+/g, '_')}.jpg`;
+            });
         });
 
         // Confirmation pour les actions sensibles
@@ -517,5 +603,4 @@
     });
 </script>
 <?php $__env->stopPush(); ?>
-
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Applications/MAMP/htdocs/carteprofessionnnelle/resources/views/agents/index.blade.php ENDPATH**/ ?>

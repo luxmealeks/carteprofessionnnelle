@@ -85,6 +85,7 @@ public function store(Request $request)
             $q->where('inspection_academique_id', $inspection->id);
         })
         ->where('statut_photo', 'validee') 
+        ->whereDoesntHave('lots') // ✅ exclure les agents déjà affectés à un lot
         ->get();
 
     foreach ($agents as $agent) {

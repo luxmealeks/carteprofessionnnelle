@@ -5,7 +5,7 @@
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-primary text-white">
             <h2 class="mb-0">
-                <i class="bi bi-images me-2"></i>Validation des Photos d'Agents
+                <i class="bi bi-images me-2"></i>Validation des Photos d'Agents en attente
             </h2>
         </div>
 
@@ -30,6 +30,7 @@
                             <tr>
                                 <!-- Colonne Photo -->
                                 <td>
+                                    @if($agent->photo)
                                     <div class="photo-preview">
                                         <img src="{{ Storage::url($agent->photo) }}"
                                              alt="Photo de {{ $agent->prenom }} {{ $agent->nom }}"
@@ -37,6 +38,11 @@
                                              data-bs-toggle="modal"
                                              data-bs-target="#photoModal{{ $agent->id }}">
                                     </div>
+                                    @else
+                                    <div class="photo-preview bg-light d-flex align-items-center justify-content-center" style="width:80px;height:100px;">
+                                        <i class="bi bi-person text-muted" style="font-size:2rem;"></i>
+                                    </div>
+                                    @endif
                                 </td>
 
                                 <!-- Colonne Informations -->
@@ -44,7 +50,7 @@
                                     <h5 class="mb-1">{{ $agent->prenom }} {{ $agent->nom }}</h5>
                                     <div class="text-muted small">
                                         <div><i class="bi bi-person-badge me-1"></i> {{ $agent->matricule }}</div>
-                                        <div><i class="bi bi-telephone me-1"></i> {{ $agent->telephone }}</div>
+                                        <div><i class="bi bi-telephone me-1"></i> {{ $agent->telephone ?? 'Non renseigné' }}</div>
                                         @if($agent->email)
                                             <div><i class="bi bi-envelope me-1"></i> {{ $agent->email }}</div>
                                         @endif
@@ -79,6 +85,7 @@
                             </tr>
 
                             <!-- Modal pour la photo en grand -->
+                            @if($agent->photo)
                             <div class="modal fade" id="photoModal{{ $agent->id }}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
@@ -92,6 +99,7 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
 
                             <!-- Modal pour le rejet -->
                             <div class="modal fade" id="rejetModal{{ $agent->id }}" tabindex="-1" aria-hidden="true">
@@ -124,6 +132,11 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Pagination -->
+                <div class="d-flex justify-content-center mt-4">
+                    {{ $agents->links() }}
+                </div>
             @endif
         </div>
     </div>
@@ -144,6 +157,9 @@
     }
     .table th {
         white-space: nowrap;
+    }
+    .photo-preview .bi-person {
+        font-size: 2.5rem;
     }
 </style>
 @endpush

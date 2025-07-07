@@ -30,21 +30,41 @@
     @include('partials.alerts')
 
     @if(request()->anyFilled(['search', 'statut', 'affectation', 'sort']))
-<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
-    <strong>Filtres actifs :</strong>
-    @foreach(request()->all() as $key => $value)
-        @if(in_array($key, ['search', 'statut', 'affectation', 'sort']) && !empty($value))
-            <span class="badge bg-primary me-1">
-                {{ $key }}: {{ $value }}
-            </span>
-        @endif
-    @endforeach
-    <a href="{{ route('agents.index') }}" class="btn btn-sm btn-outline-light ms-2">
-        <i class="bi bi-x-lg"></i> Réinitialiser
-    </a>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-@endif
+    <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+        <strong>Filtres actifs :</strong>
+        @foreach(request()->all() as $key => $value)
+            @if(in_array($key, ['search', 'statut', 'affectation', 'sort']) && !empty($value))
+                <span class="badge bg-primary me-1">
+                    @if($key === 'affectation' && Str::startsWith($value, 'etablissement_'))
+                        @php
+                            $etablissementId = Str::after($value, 'etablissement_');
+                            $etablissement = $etablissements->firstWhere('id', $etablissementId);
+                            $displayValue = $etablissement ? 'Établissement: '.$etablissement->nom : $value;
+                        @endphp
+                        {{ $displayValue }}
+                    @elseif($key === 'sort')
+                        @php
+                            $sortOptions = [
+                                'nom_asc' => 'Nom (A-Z)',
+                                'nom_desc' => 'Nom (Z-A)',
+                                'date_asc' => 'Plus anciens',
+                                'date_desc' => 'Plus récents'
+                            ];
+                            $displayValue = $sortOptions[$value] ?? $value;
+                        @endphp
+                        Trier par: {{ $displayValue }}
+                    @else
+                        {{ ucfirst($key) }}: {{ $value }}
+                    @endif
+                </span>
+            @endif
+        @endforeach
+        <a href="{{ route('agents.index') }}" class="btn btn-sm btn-outline-light ms-2">
+            <i class="bi bi-x-lg"></i> Réinitialiser
+        </a>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
 
     <!-- Filters Section -->
     <div class="card mb-4 border-0 shadow-sm">
@@ -106,35 +126,26 @@
     <!-- Agents Table -->
     <div class="card shadow-sm border-0 overflow-hidden">
         <div class="card-body p-0">
-            <!-- Agents Table -->
-<div class="card shadow-sm border-0 overflow-hidden">
-    <div class="card-body p-0">
-        <!-- Message aucun résultat -->
-        @if($agents->isEmpty() && request()->anyFilled(['search', 'statut', 'affectation']))
-        <div class="alert alert-warning m-4">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            Aucun agent ne correspond à vos critères de recherche.
-            <a href="{{ route('agents.index') }}" class="alert-link">Réinitialiser les filtres</a>
-        </div>
-        @endif
+            @if($agents->isEmpty() && request()->anyFilled(['search', 'statut', 'affectation']))
+            <div class="alert alert-warning m-4">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Aucun agent ne correspond à vos critères de recherche.
+                <a href="{{ route('agents.index') }}" class="alert-link">Réinitialiser les filtres</a>
+            </div>
+            @endif
 
-
-    </div>
-</div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th width="60" class="text-center">Photo</th>
-                            <th>Matricule</th>
-                            <th>Nom & Prénom</th>
-                            <th>CIN</th>
-                            <th>Contact</th>
-                            <th>Fonction</th>
-                            <th>Corps</th>
-                            <th>Grade</th>
-                            <th>Affectation</th>
-                            <th>Statut</th>
+                            <th width="120">Matricule</th>
+                            <th>Nom Complet</th>
+                            <th width="120">CIN</th>
+                            <th width="180">Contact</th>
+                            <th width="220">Fonction</th>
+                            <th width="200">Affectation</th>
+                            <th width="120">Statut</th>
                             <th width="140" class="text-end">Actions</th>
                         </tr>
                     </thead>
@@ -142,14 +153,16 @@
                         @forelse($agents as $agent)
                         <tr>
                             <!-- Photo -->
-                            <td class="text-center">
+                            <td class="text-center" data-label="Photo">
                                 <div class="avatar-wrapper">
                                     @if($agent->photo)
                                         <img src="{{ asset('storage/'.$agent->photo) }}"
                                              alt="Photo de {{ $agent->prenom }} {{ $agent->nom }}"
                                              class="avatar-img"
                                              data-bs-toggle="modal"
-                                             data-bs-target="#photoModal{{ $agent->id }}">
+                                             data-bs-target="#photoModal"
+                                             data-agent-name="{{ $agent->prenom }} {{ $agent->nom }}"
+                                             data-photo-url="{{ asset('storage/'.$agent->photo) }}">
                                     @else
                                         <div class="avatar-placeholder">
                                             <i class="bi bi-person"></i>
@@ -158,140 +171,151 @@
                                 </div>
                             </td>
 
-                            <!-- Identification -->
-                            <td>
-                                <span class="fw-semibold">{{ $agent->matricule }}</span>
+                            <!-- Matricule -->
+                            <td data-label="Matricule">
+                                <span class="fw-semibold badge bg-light text-dark">{{ $agent->matricule }}</span>
                             </td>
 
-                            <td>
+                            <!-- Nom complet -->
+                            <td data-label="Nom">
                                 <div class="d-flex flex-column">
                                     <span class="fw-semibold">{{ $agent->nom }}</span>
                                     <small class="text-muted">{{ $agent->prenom }}</small>
                                 </div>
                             </td>
 
-                            <td>{{ $agent->cin ?? 'N/A' }}</td>
+                            <!-- CIN -->
+                            <td data-label="CIN">
+                                <span class="badge bg-light text-dark">{{ $agent->cin ?? 'N/A' }}</span>
+                            </td>
 
                             <!-- Contact -->
-                            <td>
-                                <div class="d-flex flex-column">
+                            <td data-label="Contact">
+                                <div class="d-flex flex-column small">
                                     @if($agent->email)
-                                        <a href="mailto:{{ $agent->email }}" class="text-primary text-decoration-none">
-                                            <small><i class="bi bi-envelope me-1"></i>{{ $agent->email }}</small>
+                                        <a href="mailto:{{ $agent->email }}" class="text-truncate text-primary text-decoration-none" title="{{ $agent->email }}">
+                                            <i class="bi bi-envelope me-1"></i>{{ Str::limit($agent->email, 15) }}
                                         </a>
                                     @endif
                                     @if($agent->telephone)
-                                        <small><i class="bi bi-telephone me-1"></i>{{ $agent->telephone }}</small>
+                                        <span class="text-truncate" title="{{ $agent->telephone }}">
+                                            <i class="bi bi-telephone me-1"></i>{{ $agent->telephone }}
+                                        </span>
                                     @endif
                                 </div>
                             </td>
 
                             <!-- Fonction -->
-                            <td>
-                                <span class="d-block">{{ $agent->fonction ?? 'N/A' }}</span>
-                                <small class="text-muted">
-                                    {{ $agent->corps->nom ?? '' }} {{ $agent->grade->nom ?? '' }}
-                                </small>
-                            </td>
-                            <!-- Corps -->
-                            <td>{{ $agent->corps->nom ?? 'N/A' }}</td>
-
-                            <!-- Grade -->
-                            <td>{{ $agent->grade->nom ?? 'N/A' }}</td>
-
-
-                            <!-- Affectation -->
-                            <td>
+                            <td data-label="Fonction">
                                 <div class="d-flex flex-column">
-                                    <span>{{ $agent->etablissement->nom ?? $agent->direction->nom ?? 'N/A' }}</span>
-                                    <small class="text-muted">{{ $agent->inspectionAcademique->nom ?? '' }}</small>
+                                    <span class="fw-semibold">{{ $agent->fonction ?? 'N/A' }}</span>
+                                    <small class="text-muted">
+                                        {{ $agent->corps->nom ?? '' }} / {{ $agent->grade->nom ?? '' }}
+                                    </small>
                                 </div>
                             </td>
 
+                            <!-- Affectation -->
+                            <td data-label="Affectation">
+                                <div class="d-flex flex-column">
+                                    <span class="fw-semibold">
+                                        @if($agent->structure_id && $agent->relationLoaded('structure') && $agent->structure)
+                                            Structure : {{ $agent->structure->nom }}
+                                        @elseif($agent->etablissement_id && $agent->relationLoaded('etablissement') && $agent->etablissement)
+                                            Établissement : {{ $agent->etablissement->nom }}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </span>
+                                    
+                                    <small class="text-muted">
+                                        @if($agent->relationLoaded('inspectionAcademique') && $agent->inspectionAcademique)
+                                            {{ $agent->inspectionAcademique->nom }}
+                                        @elseif($agent->relationLoaded('etablissement') && $agent->etablissement && $agent->etablissement->relationLoaded('inspectionAcademique') && $agent->etablissement->inspectionAcademique)
+                                            {{ $agent->etablissement->inspectionAcademique->nom }}
+                                        @endif
+                                    </small>
+                                </div>
+                            </td>
+                            
+
+
                             <!-- Statut -->
-                            <td>
+                            <td data-label="Statut">
                                 @if($agent->statut_photo === 'validee')
-                                    <span class="badge bg-success bg-opacity-10 text-success">
-                                        <i class="bi bi-check-circle-fill me-1"></i> Validée
+                                    <span class="badge bg-success bg-opacity-10 text-success d-flex align-items-center">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Validé
                                     </span>
                                 @elseif($agent->statut_photo === 'rejetee')
-                                    <span class="badge bg-danger bg-opacity-10 text-danger">
-                                        <i class="bi bi-x-circle-fill me-1"></i> Rejetée
+                                    <span class="badge bg-danger bg-opacity-10 text-danger d-flex align-items-center">
+                                        <i class="bi bi-x-circle-fill me-1"></i> Rejeté
                                     </span>
-                                    @if($agent->motif_rejet_photo)
-                                        <div class="text-muted small mt-1" data-bs-toggle="tooltip" title="{{ $agent->motif_rejet_photo }}">
-                                            {{ Str::limit($agent->motif_rejet_photo, 20) }}
-                                        </div>
-                                    @endif
                                 @else
-                                    <span class="badge bg-warning bg-opacity-10 text-warning">
+                                    <span class="badge bg-warning bg-opacity-10 text-warning d-flex align-items-center">
                                         <i class="bi bi-hourglass-split me-1"></i> En attente
                                     </span>
                                 @endif
                             </td>
-
-                            <!-- Actions -->
-                            <td class="text-end">
+                            <td class="text-end" data-label="Actions">
                                 <div class="d-flex justify-content-end gap-1">
-                                    <a href="{{ route('agents.show', $agent->id) }}"
-                                       class="btn btn-icon btn-sm btn-outline-primary"
+                                    <!-- Bouton Traiter -->
+                                 {{--    <a href="{{ route('photos.traiter', $agent) }}" 
+                                       class="btn btn-xs btn-icon btn-warning"
                                        data-bs-toggle="tooltip"
-                                       title="Voir détails">
-                                        <i class="bi bi-eye"></i>
+                                       title="Traiter la photo">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a> --}}
+                                    
+                                    <!-- Bouton Voir -->
+                                    <a href="{{ route('agents.show', $agent->id) }}"
+                                       class="btn btn-xs btn-icon btn-primary"
+                                       data-bs-toggle="tooltip"
+                                       title="Voir fiche">
+                                        <i class="bi bi-eye-fill"></i>
                                     </a>
+                                    
+                                    <!-- Bouton Modifier -->
                                     <a href="{{ route('agents.edit', $agent->id) }}"
-                                       class="btn btn-icon btn-sm btn-outline-secondary"
+                                       class="btn btn-xs btn-icon btn-secondary"
                                        data-bs-toggle="tooltip"
                                        title="Modifier">
-                                        <i class="bi bi-pencil"></i>
+                                        <i class="bi bi-pencil-fill"></i>
                                     </a>
-                                    @if($agent->statut_photo === 'en_attente')
-                                        <form action="{{ route('agents.validerPhoto', $agent->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="btn btn-icon btn-sm btn-outline-success"
-                                                    data-bs-toggle="tooltip"
-                                                    title="Valider photo">
-                                                <i class="bi bi-check-lg"></i>
-                                            </button>
-                                        </form>
-                                    @endif
+                                    
+                                    <!-- Bouton Carte (conditionnel) -->
                                     @if($agent->statut_photo === 'validee')
-                                        <a href="{{ route('agents.generateCard', $agent->id) }}"
-                                           class="btn btn-icon btn-sm btn-outline-info"
-                                           data-bs-toggle="tooltip"
-                                           title="Générer la carte">
-                                            <i class="bi bi-person-badge"></i>
-                                        </a>
+                                    <a href="{{ route('agents.generateCard', $agent->id) }}"
+                                       class="btn btn-xs btn-icon btn-success"
+                                       data-bs-toggle="tooltip"
+                                       title="Générer carte">
+                                        <i class="bi bi-person-badge-fill"></i>
+                                    </a>
                                     @endif
                                 </div>
                             </td>
+                            
+                            <style>
+                                /* Boutons ultra-compacts */
+                                .btn-xs {
+                                    padding: 0.25rem 0.35rem;
+                                    font-size: 0.75rem;
+                                    line-height: 1;
+                                    border-radius: 3px;
+                                }
+                                
+                                /* Icônes légèrement plus petites */
+                                .btn-icon i {
+                                    font-size: 0.9em;
+                                    vertical-align: middle;
+                                }
+                                
+                                /* Effet hover discret */
+                                .btn-icon:hover {
+                                    transform: scale(1.1);
+                                    transition: transform 0.15s ease;
+                                }
+                            </style>
                         </tr>
-
-                        <!-- Photo Modal -->
-                        <div class="modal fade" id="photoModal{{ $agent->id }}" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Photo de {{ $agent->prenom }} {{ $agent->nom }}</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img src="{{ asset('storage/'.$agent->photo) }}"
-                                             class="img-fluid rounded"
-                                             alt="Photo de {{ $agent->prenom }} {{ $agent->nom }}">
-                                    </div>
-                                    <div class="modal-footer">
-                                        <a href="{{ asset('storage/'.$agent->photo) }}"
-                                           download="photo_{{ $agent->matricule }}.jpg"
-                                           class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-download me-1"></i> Télécharger
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         @empty
                         <tr>
                             <td colspan="9" class="text-center py-5">
@@ -310,7 +334,7 @@
             </div>
 
             <!-- Pagination -->
-            @if($agents->hasPages())
+            @if($agents->total() > $agents->perPage())
                 <div class="card-footer bg-white border-top">
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center py-2">
                         <div class="mb-2 mb-md-0">
@@ -346,7 +370,7 @@
                     <label for="fichier" class="form-label">Fichier Excel</label>
                     <input type="file" name="fichier" id="fichier" class="form-control" required
                            accept=".xlsx,.xls,.csv" data-accept=".xlsx,.xls,.csv">
-                    <div class="form-text">Formats acceptés: .xlsx, .xls, .csv</div>
+                    <div class="form-text">Formats acceptés: .xlsx, .xls, .csv (Max 5MB)</div>
                 </div>
                 <div class="alert alert-info small mb-0">
                     <i class="bi bi-info-circle-fill me-1"></i>
@@ -361,6 +385,27 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Single Photo Modal -->
+<div class="modal fade" id="photoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="photoModalTitle">Photo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalPhotoImg" src="" class="img-fluid rounded" alt="">
+            </div>
+            <div class="modal-footer">
+                <a id="modalDownloadLink" href="#" download class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-download me-1"></i> Télécharger
+                </a>
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
@@ -380,18 +425,20 @@
         white-space: nowrap;
         background-color: #f8fafc;
         border-bottom-width: 1px;
+        padding: 0.75rem 0.5rem;
+        position: relative;
     }
 
     .table td {
         font-size: 0.875rem;
         vertical-align: middle;
-        padding: 1rem 0.75rem;
+        padding: 0.75rem 0.5rem;
     }
 
     /* Avatar styling */
     .avatar-wrapper {
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
         margin: 0 auto;
         cursor: pointer;
         transition: transform 0.2s;
@@ -426,6 +473,7 @@
         font-weight: 500;
         letter-spacing: 0.3px;
         padding: 0.35em 0.65em;
+        font-size: 0.75em;
     }
 
     /* Action buttons */
@@ -459,13 +507,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.75rem;
+            padding: 0.5rem;
             border-bottom: 1px solid #f8f9fa;
         }
 
         .table td::before {
             content: attr(data-label);
-            font-weight: 600;
+            min-width: 120px;
+            font-weight: 500;
             margin-right: 1rem;
             color: #495057;
             font-size: 0.8rem;
@@ -478,13 +527,18 @@
         .avatar-wrapper {
             margin: 0;
         }
+
+        .btn-group .btn {
+            padding: 0.2rem 0.4rem;
+            font-size: 0.875rem;
+        }
     }
 </style>
 @endpush
 
 @push('scripts')
 <script>
-    // Activer les tooltips
+    // Activer les tooltips et gérer la modale photo
     document.addEventListener('DOMContentLoaded', function() {
         // Tooltips
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -496,11 +550,41 @@
         document.getElementById('fichier').addEventListener('change', function(e) {
             const file = e.target.files[0];
             const acceptedTypes = this.getAttribute('data-accept').split(',');
+            const maxSize = 5 * 1024 * 1024; // 5MB
 
-            if (file && !acceptedTypes.some(type => file.name.endsWith(type))) {
-                alert('Veuillez sélectionner un fichier Excel (.xlsx, .xls) ou CSV');
-                this.value = '';
+            if (file) {
+                // Vérifier le type
+                if (!acceptedTypes.some(type => file.name.endsWith(type))) {
+                    alert('Veuillez sélectionner un fichier Excel (.xlsx, .xls) ou CSV');
+                    this.value = '';
+                    return;
+                }
+
+                // Vérifier la taille
+                if (file.size > maxSize) {
+                    alert('Le fichier est trop volumineux (max 5MB)');
+                    this.value = '';
+                }
             }
+        });
+
+        // Gestion de la modale photo unique
+        const photoModal = new bootstrap.Modal(document.getElementById('photoModal'));
+        const modalTitle = document.getElementById('photoModalTitle');
+        const modalImg = document.getElementById('modalPhotoImg');
+        const downloadLink = document.getElementById('modalDownloadLink');
+        
+        document.querySelectorAll('[data-bs-target="#photoModal"]').forEach(trigger => {
+            trigger.addEventListener('click', function() {
+                const agentName = this.getAttribute('data-agent-name');
+                const photoUrl = this.getAttribute('data-photo-url');
+                
+                modalTitle.textContent = `Photo de ${agentName}`;
+                modalImg.src = photoUrl;
+                modalImg.alt = `Photo de ${agentName}`;
+                downloadLink.href = photoUrl;
+                downloadLink.download = `photo_${agentName.replace(/\s+/g, '_')}.jpg`;
+            });
         });
 
         // Confirmation pour les actions sensibles

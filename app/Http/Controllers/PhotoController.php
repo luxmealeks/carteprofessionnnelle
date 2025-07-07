@@ -4,14 +4,94 @@ namespace App\Http\Controllers;
 
 use App\Models\Agent;
 use Illuminate\Http\Request;
+use Intervention\Image\Facades\Image;
 
 class PhotoController extends Controller
 {
     public function index()
     {
-        $agents = Agent::with('etablissement')->whereNotNull('photo')->get();
-        return view('photos.index', compact('agents'));
+       // Récupère les agents avec photo en attente de validation
+    $agents = Agent::where('statut_photo', 'en_attente')
+    ->with(['etablissement', 'inspectionAcademique'])
+    ->paginate(10);
+    
+      return view('photos.validation', compact('agents'));
     }
+    
+    
+    
+    public function traiter(Agent $agent)
+{
+    return view('photos.traiter', compact('agent'));
+}
+public function recadrer(Agent $agent)
+{
+    if (!$agent->photo) {
+        return redirect()->route('photos.validation')->with('error', 'Cet agent n\'a pas de photo à recadrer');
+    }
+
+    return view('photos.recadrer', compact('agent'));
+}
+
+public function updateCrop(Request $request, Agent $agent)
+{
+    $validated = $request->validate([
+        'x' => 'required|numeric',
+        'y' => 'required|numeric',
+        'width' => 'required|numeric',
+        'height' => 'required|numeric',
+        'rotate' => 'sometimes|numeric'
+    ]);
+
+    // Chemin vers l'image originale
+    $path = storage_path('app/public/' . $agent->photo);
+    
+    // Créer une intervention image
+    $image = Image::make($path);
+    
+    // Appliquer la rotation si nécessaire
+    if ($request->rotate) {
+        $image->rotate($request->rotate);
+    }
+    
+    // Recadrer l'image
+    $image->crop(
+        (int)$request->width,
+        (int)$request->height,
+        (int)$request->x,
+        (int)$request->y
+    );
+    
+    // Sauvegarder l'image recadrée (écrase l'originale)
+    $image->save($path);
+    
+    return redirect()
+           ->route('photos.validation')
+           ->with('success', 'Photo recadrée avec succès');
+}
+
+public function rogner(Request $request, Agent $agent)
+{
+    if ($request->hasFile('photo')) {
+        $photo = $request->file('photo');
+
+        // Supprimer ancienne photo si elle existe
+        if ($agent->photo && Storage::exists($agent->photo)) {
+            Storage::delete($agent->photo);
+        }
+
+        $path = $photo->store('public/photos');
+        $agent->update(['photo' => $path]);
+
+        return response()->json(['success' => true]);
+    }
+
+    return response()->json(['success' => false, 'error' => 'Aucune image reçue.']);
+}
+
+
+
+    
 
     public function valider(Agent $agent)
     {

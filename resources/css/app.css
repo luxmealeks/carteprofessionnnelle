@@ -1,32 +1,73 @@
 :root {
+    /* Couleurs principales */
     --mfpt-primary: #0c4b8e;
     --mfpt-primary-hover: #0a3a6e;
     --mfpt-secondary: #1a73e8;
     --mfpt-secondary-hover: #1560c0;
     --mfpt-light: #f8f9fa;
+    --mfpt-dark: #212529;
+    --mfpt-gray: #6c757d;
+    /* Effets visuels */
     --mfpt-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     --mfpt-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Dimensions */
+    --mfpt-navbar-height: 56px;
+    --mfpt-border-radius: 12px;
 }
+
+
+/* Base */
 
 body {
     background-color: #f5f7fa;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     line-height: 1.6;
     color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--mfpt-navbar-height);
 }
 
 
-/* Cartes statistiques améliorées */
+/* Layout */
+
+.main-container {
+    flex: 1;
+    display: flex;
+    min-height: calc(100vh - var(--mfpt-navbar-height));
+}
+
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    background-color: white;
+    border-radius: var(--mfpt-border-radius);
+    box-shadow: var(--mfpt-card-shadow);
+    margin: 1rem;
+    transition: var(--mfpt-transition);
+    overflow-y: auto;
+}
+
+.main-content:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Cartes statistiques */
 
 .card-stat {
     border: none;
-    border-radius: 12px;
+    border-radius: var(--mfpt-border-radius);
     box-shadow: var(--mfpt-card-shadow);
     transition: var(--mfpt-transition);
     overflow: hidden;
     background: white;
     position: relative;
     border-left: 4px solid var(--mfpt-primary);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .card-stat:hover {
@@ -38,6 +79,7 @@ body {
     padding: 1.75rem;
     position: relative;
     z-index: 1;
+    flex: 1;
 }
 
 .card-stat .stat-value {
@@ -49,7 +91,7 @@ body {
 
 .card-stat .stat-label {
     font-size: 0.9rem;
-    color: #6c757d;
+    color: var(--mfpt-gray);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -66,23 +108,7 @@ body {
 }
 
 
-/* Zone de contenu principal */
-
-.main-content {
-    padding: 2rem;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: var(--mfpt-card-shadow);
-    margin-bottom: 2rem;
-    transition: var(--mfpt-transition);
-}
-
-.main-content:hover {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-}
-
-
-/* Actions rapides améliorées */
+/* Actions rapides */
 
 .quick-actions {
     display: flex;
@@ -126,7 +152,7 @@ body {
 }
 
 
-/* Effets modernes */
+/* Animations */
 
 .hover-scale {
     transition: var(--mfpt-transition);
@@ -135,9 +161,6 @@ body {
 .hover-scale:hover {
     transform: scale(1.02);
 }
-
-
-/* Animation subtile pour les éléments interactifs */
 
 @keyframes fadeIn {
     from {
@@ -155,11 +178,40 @@ body {
 }
 
 
-/* Responsive adjustments */
+/* Navbar */
+
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1030;
+    height: var(--mfpt-navbar-height);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Responsive */
+
+@media (max-width: 992px) {
+    .main-container {
+        flex-direction: column;
+    }
+    .main-content {
+        margin: 0.5rem;
+        padding: 1.5rem;
+    }
+}
 
 @media (max-width: 768px) {
+    body {
+        padding-top: 0;
+    }
+    .navbar {
+        position: relative;
+        height: auto;
+    }
     .main-content {
-        padding: 1.5rem;
+        padding: 1rem;
         border-radius: 0;
     }
     .card-stat .card-body {
@@ -168,82 +220,13 @@ body {
     .quick-actions .btn {
         min-width: 100%;
     }
-    /* Ajoutez ces règles à votre fichier CSS existant */
-     :root {
-        /* Vos variables existantes... */
-        --mfpt-navbar-height: 56px;
-        /* Ajout d'une variable pour la hauteur de la navbar */
+}
+
+@media (max-width: 576px) {
+    .card-stat .stat-value {
+        font-size: 1.5rem;
     }
-    body {
-        /* Modifiez votre déclaration existante */
-        background-color: #f5f7fa;
-        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        line-height: 1.6;
-        color: #333;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        padding-top: var(--mfpt-navbar-height);
-        /* Espace pour la navbar fixe */
-    }
-    /* Nouvelle règle pour le conteneur principal */
-    .main-container {
-        flex: 1;
-        display: flex;
-        min-height: calc(100vh - var(--mfpt-navbar-height));
-    }
-    /* Style pour le contenu principal */
-    .main-content {
-        flex: 1;
-        padding: 2rem;
-        overflow-y: auto;
-        /* Permet le scrolling si le contenu est trop long */
-        margin-top: 1rem;
-    }
-    /* Correction pour la navbar */
-    .navbar {
-        position: fixed;
-        top: 0;
-        width: 100%;
-        z-index: 1030;
-        height: var(--mfpt-navbar-height);
-    }
-    /* Adaptation du dashboard */
-    .dashboard-container {
-        width: 100%;
-        padding: 20px;
-        overflow-y: auto;
-        height: calc(100vh - var(--mfpt-navbar-height));
-    }
-    /* Correction pour les cartes dans le dashboard */
-    .card-stat {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-    .card-stat .card-body {
-        flex: 1;
-    }
-    /* Responsive adjustments - Mise à jour */
-    @media (max-width: 768px) {
-        body {
-            padding-top: 0;
-        }
-        .navbar {
-            position: relative;
-            height: auto;
-        }
-        .main-container {
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .dashboard-container {
-            height: auto;
-            padding: 15px;
-        }
-        .main-content {
-            padding: 1rem;
-            margin-top: 0;
-        }
+    .stat-icon {
+        font-size: 2.5rem;
     }
 }
